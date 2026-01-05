@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "smelteros",
+    "production": "smelteros"
+  },
+  "targets": {
+    "smelteros": {
+      "hosting": {
+        "smelteros": [
+          "smelteros"
+        ]
+      }
+    }
+  }
+}

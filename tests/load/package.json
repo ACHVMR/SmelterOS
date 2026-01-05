@@ -1,0 +1,23 @@
+{
+  "name": "@smelteros/load-tests",
+  "version": "1.0.0",
+  "description": "Load testing suite for SmelterOS production",
+  "scripts": {
+    "test:api": "artillery run artillery.yml --output reports/api-report.json",
+    "test:workers": "artillery run workers-stress.yml --output reports/workers-report.json",
+    "test:all": "npm run test:api && npm run test:workers",
+    "test:quick": "artillery run artillery.yml --config quick-config.yml --output reports/quick-report.json",
+    "report:api": "artillery report reports/api-report.json --output reports/api-report.html",
+    "report:workers": "artillery report reports/workers-report.json --output reports/workers-report.html",
+    "report:all": "npm run report:api && npm run report:workers",
+    "validate:p95": "node scripts/validate-p95.js"
+  },
+  "dependencies": {
+    "artillery": "^2.0.0",
+    "artillery-plugin-expect": "^2.0.0",
+    "artillery-plugin-metrics-by-endpoint": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0"
+  }
+}

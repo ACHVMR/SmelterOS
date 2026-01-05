@@ -1,0 +1,246 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# SmelterOS Phase 3 Cloud Build Configuration
+# II Integration, RL Optimization, CoT Visualization, Security Hardening
+# ═══════════════════════════════════════════════════════════════════════════
+
+steps:
+  # =========================================================================
+  # STEP 1: Install dependencies
+  # =========================================================================
+  - name: 'node:20'
+    id: 'install'
+    entrypoint: 'npm'
+    args: ['ci']
+    env:
+      - 'NODE_ENV=production'
+
+  # =========================================================================
+  # STEP 2: TypeScript compilation
+  # =========================================================================
+  - name: 'node:20'
+    id: 'build'
+    entrypoint: 'npm'
+    args: ['run', 'build']
+    waitFor: ['install']
+
+  # =========================================================================
+  # STEP 3: Run Phase 3 tests
+  # =========================================================================
+  - name: 'node:20'
+    id: 'test-phase3'
+    entrypoint: 'npm'
+    args: ['run', 'test:phase3']
+    waitFor: ['build']
+    env:
+      - 'NODE_ENV=test'
+      - 'II_THOUGHT_ENABLED=true'
+      - 'COT_LAB_ENABLED=true'
+      - 'II_RESEARCHER_ENABLED=true'
+      - 'II_COMMONS_FUSION_WEIGHT=0.4'
+
+  # =========================================================================
+  # STEP 4: Build Docker image with Phase 3 components
+  # =========================================================================
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'docker-build'
+    args:
+      - 'build'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/smelter-workers:phase3-${SHORT_SHA}'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/smelter-workers:latest'
+      - '--build-arg'
+      - 'II_THOUGHT_ENABLED=true'
+      - '--build-arg'
+      - 'COT_LAB_ENABLED=true'
+      - '--build-arg'
+      - 'II_RESEARCHER_ENABLED=true'
+      - '.'
+    waitFor: ['test-phase3']
+
+  # =========================================================================
+  # STEP 5: Push Docker image
+  # =========================================================================
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'docker-push'
+    args:
+      - 'push'
+      - '--all-tags'
+      - 'gcr.io/$PROJECT_ID/smelter-workers'
+    waitFor: ['docker-build']
+
+  # =========================================================================
+  # STEP 6: Deploy to Cloud Run with Phase 3 environment variables
+  # =========================================================================
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'deploy'
+    entrypoint: 'gcloud'
+    args:
+      - 'run'
+      - 'deploy'
+      - 'smelter-workers'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/smelter-workers:phase3-${SHORT_SHA}'
+      - '--region'
+      - 'us-central1'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--memory'
+      - '2Gi'
+      - '--cpu'
+      - '2'
+      - '--min-instances'
+      - '1'
+      - '--max-instances'
+      - '10'
+      - '--concurrency'
+      - '100'
+      - '--timeout'
+      - '300s'
+      - '--set-env-vars'
+      - 'NODE_ENV=production,II_THOUGHT_ENABLED=true,COT_LAB_ENABLED=true,II_RESEARCHER_ENABLED=true,II_COMMONS_FUSION_WEIGHT=0.4,II_THOUGHT_BACKEND=cloud-run'
+    waitFor: ['docker-push']
+
+  # =========================================================================
+  # STEP 7: Deploy Phase 3 II Integration sandboxes
+  # =========================================================================
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'deploy-sandboxes-opt'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        echo "🚀 Deploying Phase 3 II Integration Sandboxes..."
+        
+        # Get the Cloud Run URL
+        CLOUD_RUN_URL=$(gcloud run services describe smelter-workers --region=us-central1 --format='value(status.url)')
+        
+        # Deploy all Phase 3 sandboxes
+        curl -X POST "$${CLOUD_RUN_URL}/sandbox/deploy-all-opt" \
+          -H "Content-Type: application/json" \
+          -H "Authorization: Bearer $(gcloud auth print-identity-token)" \
+          --fail
+        
+        echo "✅ Phase 3 sandboxes deployed"
+    waitFor: ['deploy']
+
+  # =========================================================================
+  # STEP 8: Run Phase 3 E2E verification tests
+  # =========================================================================
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'e2e-phase3'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        echo "═══════════════════════════════════════════════════════════════════"
+        echo "           PHASE 3 E2E VERIFICATION TESTS"
+        echo "═══════════════════════════════════════════════════════════════════"
+        
+        CLOUD_RUN_URL=$(gcloud run services describe smelter-workers --region=us-central1 --format='value(status.url)')
+        
+        # Test 1: II-Thought RL Optimization
+        echo "🧠 Test 1: II-Thought RL Optimization..."
+        RL_RESULT=$(curl -s -X POST "$${CLOUD_RUN_URL}/ii-thought/optimize" \
+          -H "Content-Type: application/json" \
+          -d '{"task": "optimize-agent-selection", "iterations": 5}')
+        
+        if echo "$$RL_RESULT" | grep -q '"success":true'; then
+          echo "   ✓ II-Thought optimization passed"
+          RL_SCORE=$(echo "$$RL_RESULT" | grep -o '"finalScore":[0-9.]*' | cut -d':' -f2)
+          echo "   ✓ RL Score: $$RL_SCORE"
+        else
+          echo "   ✗ II-Thought optimization failed"
+          exit 1
+        fi
+        
+        # Test 2: CoT Visualization
+        echo "📊 Test 2: CoT Visualization..."
+        # Start a trace
+        TRACE_RESULT=$(curl -s -X POST "$${CLOUD_RUN_URL}/cot/trace/start" \
+          -H "Content-Type: application/json" \
+          -d '{"sessionId": "e2e-test-phase3", "query": "test query"}')
+        
+        if echo "$$TRACE_RESULT" | grep -q '"success":true'; then
+          echo "   ✓ CoT trace started"
+        else
+          echo "   ✗ CoT trace start failed"
+          exit 1
+        fi
+        
+        # Test 3: II-Commons Hybrid Embedding
+        echo "🔗 Test 3: II-Commons Hybrid Embedding..."
+        EMBED_RESULT=$(curl -s -X POST "$${CLOUD_RUN_URL}/ii-commons/embed" \
+          -H "Content-Type: application/json" \
+          -d '{"content": "Test embedding for Phase 3 verification"}')
+        
+        if echo "$$EMBED_RESULT" | grep -q '"dimensions"'; then
+          DIMS=$(echo "$$EMBED_RESULT" | grep -o '"dimensions":[0-9]*' | cut -d':' -f2)
+          echo "   ✓ Hybrid embedding passed ($$DIMS dimensions)"
+        else
+          echo "   ✗ Hybrid embedding failed"
+          exit 1
+        fi
+        
+        # Test 4: Security - Escape Detection
+        echo "🔒 Test 4: Security - Escape Detection..."
+        ESCAPE_RESULT=$(curl -s -X POST "$${CLOUD_RUN_URL}/sandbox/detect-escape" \
+          -H "Content-Type: application/json" \
+          -d '{"code": "import os; os.system(\"rm -rf /\")"}')
+        
+        if echo "$$ESCAPE_RESULT" | grep -q '"detected":true'; then
+          echo "   ✓ Escape detection working (blocked malicious code)"
+        else
+          echo "   ✗ Escape detection failed"
+          exit 1
+        fi
+        
+        # Test 5: II-Researcher Deep Research
+        echo "🔬 Test 5: II-Researcher Deep Research..."
+        RESEARCH_RESULT=$(curl -s -X POST "$${CLOUD_RUN_URL}/ii-researcher/research" \
+          -H "Content-Type: application/json" \
+          -d '{"query": "Phase 3 E2E test query", "depth": "shallow"}')
+        
+        if echo "$$RESEARCH_RESULT" | grep -q '"success":true'; then
+          echo "   ✓ II-Researcher research passed"
+        else
+          echo "   ✗ II-Researcher research failed"
+          exit 1
+        fi
+        
+        echo ""
+        echo "═══════════════════════════════════════════════════════════════════"
+        echo "           ✅ ALL PHASE 3 E2E TESTS PASSED"
+        echo "═══════════════════════════════════════════════════════════════════"
+    waitFor: ['deploy-sandboxes-opt']
+
+# =========================================================================
+# IMAGES TO PUSH
+# =========================================================================
+images:
+  - 'gcr.io/$PROJECT_ID/smelter-workers:phase3-${SHORT_SHA}'
+  - 'gcr.io/$PROJECT_ID/smelter-workers:latest'
+
+# =========================================================================
+# BUILD OPTIONS
+# =========================================================================
+options:
+  logging: CLOUD_LOGGING_ONLY
+  machineType: 'E2_HIGHCPU_8'
+  substitutionOption: 'ALLOW_LOOSE'
+
+# =========================================================================
+# TIMEOUT
+# =========================================================================
+timeout: '1800s'
+
+# =========================================================================
+# SUBSTITUTIONS
+# =========================================================================
+substitutions:
+  _PHASE: 'phase3'
+  _II_THOUGHT_ENABLED: 'true'
+  _COT_LAB_ENABLED: 'true'
+  _II_RESEARCHER_ENABLED: 'true'
+  _II_COMMONS_FUSION_WEIGHT: '0.4'

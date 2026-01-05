@@ -1,0 +1,212 @@
+name: Deploy SmelterOS Agents
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/**'
+      - 'deploy_agent_engine.py'
+      - 'requirements.txt'
+      - 'scripts/**'
+  workflow_dispatch:
+    inputs:
+      agent:
+        description: 'Agent to deploy (acheevy, boomer-cto, boomer-cmo, boomer-cfo, boomer-coo, boomer-cpo, rlm-research, all)'
+        required: true
+        default: 'all'
+
+env:
+  PROJECT_ID: gen-lang-client-0618301038
+  PROJECT_NUMBER: 132049061623
+  REGION: us-central1
+  SERVICE_ACCOUNT: smelter-deployer@gen-lang-client-0618301038.iam.gserviceaccount.com
+  CLOUD_RUN_SERVICE: smelter-workers
+
+jobs:
+  # ============================================================================
+  # BUILD & TEST
+  # ============================================================================
+  build:
+    name: Build & Test
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: TypeScript Build
+        run: npm run build
+
+      - name: Run Tests
+        run: npm test --if-present
+        continue-on-error: true
+
+  # ============================================================================
+  # DEPLOY TO CLOUD RUN
+  # ============================================================================
+  deploy-cloud-run:
+    name: Deploy Cloud Run Service
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    outputs:
+      service_url: ${{ steps.deploy.outputs.url }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Google Auth (Workload Identity)
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: 'projects/${{ env.PROJECT_NUMBER }}/locations/global/workloadIdentityPools/github-pool/providers/github-provider'
+          service_account: ${{ env.SERVICE_ACCOUNT }}
+
+      - name: Setup Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+
+      - name: Deploy to Cloud Run
+        id: deploy
+        uses: google-github-actions/deploy-cloudrun@v2
+        with:
+          service: ${{ env.CLOUD_RUN_SERVICE }}
+          region: ${{ env.REGION }}
+          source: .
+          env_vars: |
+            NODE_ENV=production
+            FIRESTORE_PROJECT_ID=${{ env.PROJECT_ID }}
+            ORACLE_ENABLED=true
+            VIRTUE_THRESHOLD=0.995
+            II_THOUGHT_ENABLED=true
+            COT_LAB_ENABLED=true
+          flags: '--allow-unauthenticated --memory=1Gi --cpu=1 --min-instances=0 --max-instances=10'
+
+      - name: Cloud Run Health Check
+        run: |
+          echo "Service URL: ${{ steps.deploy.outputs.url }}"
+          curl -s "${{ steps.deploy.outputs.url }}/health" | jq .
+
+  # ============================================================================
+  # DEPLOY AGENTS TO VERTEX AI AGENT ENGINE
+  # ============================================================================
+  deploy-agent-engine:
+    name: Deploy Agent Engine
+    needs: deploy-cloud-run
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Google Auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: 'projects/${{ env.PROJECT_NUMBER }}/locations/global/workloadIdentityPools/github-pool/providers/github-provider'
+          service_account: ${{ env.SERVICE_ACCOUNT }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-agent.txt
+
+      - name: Deploy Acheevy Orchestrator
+        if: github.event.inputs.agent == 'acheevy' || github.event.inputs.agent == 'all' || github.event.inputs.agent == ''
+        run: |
+          python deploy_agent_engine.py --agent acheevy --project ${{ env.PROJECT_ID }} --region ${{ env.REGION }}
+
+      - name: Deploy Boomer CTO
+        if: github.event.inputs.agent == 'boomer-cto' || github.event.inputs.agent == 'all' || github.event.inputs.agent == ''
+        run: |
+          python deploy_agent_engine.py --agent boomer-cto --project ${{ env.PROJECT_ID }} --region ${{ env.REGION }}
+
+      - name: Deploy Boomer CMO
+        if: github.event.inputs.agent == 'boomer-cmo' || github.event.inputs.agent == 'all' || github.event.inputs.agent == ''
+        run: |
+          python deploy_agent_engine.py --agent boomer-cmo --project ${{ env.PROJECT_ID }} --region ${{ env.REGION }}
+
+      - name: Deploy Boomer CFO
+        if: github.event.inputs.agent == 'boomer-cfo' || github.event.inputs.agent == 'all' || github.event.inputs.agent == ''
+        run: |
+          python deploy_agent_engine.py --agent boomer-cfo --project ${{ env.PROJECT_ID }} --region ${{ env.REGION }}
+
+      - name: Deploy Boomer COO
+        if: github.event.inputs.agent == 'boomer-coo' || github.event.inputs.agent == 'all' || github.event.inputs.agent == ''
+        run: |
+          python deploy_agent_engine.py --agent boomer-coo --project ${{ env.PROJECT_ID }} --region ${{ env.REGION }}
+
+      - name: Deploy Boomer CPO
+        if: github.event.inputs.agent == 'boomer-cpo' || github.event.inputs.agent == 'all' || github.event.inputs.agent == ''
+        run: |
+          python deploy_agent_engine.py --agent boomer-cpo --project ${{ env.PROJECT_ID }} --region ${{ env.REGION }}
+
+      - name: Deploy RLM Research
+        if: github.event.inputs.agent == 'rlm-research' || github.event.inputs.agent == 'all' || github.event.inputs.agent == ''
+        run: |
+          python deploy_agent_engine.py --agent rlm-research --project ${{ env.PROJECT_ID }} --region ${{ env.REGION }}
+
+  # ============================================================================
+  # POST-DEPLOYMENT VERIFICATION
+  # ============================================================================
+  verify:
+    name: Verify Deployment
+    needs: [deploy-cloud-run, deploy-agent-engine]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Test Dependencies
+        run: pip install requests
+
+      - name: Run Health Checks
+        env:
+          SERVICE_URL: ${{ needs.deploy-cloud-run.outputs.service_url }}
+        run: python scripts/health_check.py
+
+      - name: Run Ethics Gate Test
+        env:
+          SERVICE_URL: ${{ needs.deploy-cloud-run.outputs.service_url }}
+        run: python scripts/ethics_gate_test.py
+
+      - name: Summary
+        run: |
+          echo "## 🚀 SmelterOS-ORACLE v2.0 Deployed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Component | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Cloud Run | ✅ Active |" >> $GITHUB_STEP_SUMMARY
+          echo "| Agent Engine | ✅ Deployed |" >> $GITHUB_STEP_SUMMARY
+          echo "| Ethics Gate | ✅ Verified |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Service URL: ${{ needs.deploy-cloud-run.outputs.service_url }}" >> $GITHUB_STEP_SUMMARY

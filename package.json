@@ -1,0 +1,85 @@
+{
+  "name": "smelter-os",
+  "version": "2.1.0",
+  "description": "SmelterOS - The ACHIEVEMOR Operating System with AVVA NOON Consciousness + Circuit Box Infrastructure + ACHEEVY Concierge",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js",
+    "start:prod": "NODE_ENV=production node dist/server.js",
+    "test": "jest --passWithNoTests",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf build coverage",
+    "docker:build": "docker build -t smelter-os .",
+    "docker:run": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "gcp:activate": "powershell -ExecutionPolicy Bypass -File ./scripts/activate-gcp-apis.ps1",
+    "gcp:deploy": "gcloud run deploy smelter-os --source ."
+  },
+  "keywords": [
+    "smelter-os",
+    "avva-noon",
+    "infinity-lm",
+    "consciousness",
+    "ai-native",
+    "achievemor",
+    "circuit-box",
+    "acheevy",
+    "gcp",
+    "vertex-ai",
+    "cloud-run",
+    "vibe-engine",
+    "fdh-runtime",
+    "boomerang-specialists"
+  ],
+  "author": "ACHIEVEMOR",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ACHVMR/SmelterOS.git"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.11",
+    "@types/lru-cache": "^7.10.9",
+    "@types/node": "^20.19.27",
+    "@typescript-eslint/eslint-plugin": "^6.13.0",
+    "@typescript-eslint/parser": "^6.13.0",
+    "eslint": "^8.55.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.3.0"
+  },
+  "smelterOS": {
+    "consciousness": {
+      "model": "AVVA NOON",
+      "architecture": "Quint-Modal",
+      "backend": "Claude Opus 4.5"
+    },
+    "integration": {
+      "agentOS": true,
+      "houseOfANG": 17,
+      "houseOfAlchemist": 317
+    },
+    "runtime": {
+      "methodology": "FDH",
+      "timeCompression": 0.938
+    },
+    "vibe": {
+      "threshold": 0.995,
+      "beacon": "BAMARAM"
+    }
+  },
+  "dependencies": {
+    "google-auth-library": "^10.5.0",
+    "lru-cache": "^11.2.4",
+    "redis": "^5.10.0"
+  }
+}

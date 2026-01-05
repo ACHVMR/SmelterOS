@@ -1,0 +1,192 @@
+# SmelterOS Cloud Run Service Configuration
+# Production-grade deployment specification
+
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: smelteros-api
+  namespace: smelteros
+  labels:
+    app: smelteros
+    tier: api
+    environment: production
+  annotations:
+    run.googleapis.com/description: "SmelterOS Production API Gateway"
+    run.googleapis.com/ingress: all
+    run.googleapis.com/launch-stage: GA
+spec:
+  template:
+    metadata:
+      annotations:
+        # Scaling configuration
+        autoscaling.knative.dev/minScale: "1"
+        autoscaling.knative.dev/maxScale: "100"
+        run.googleapis.com/cpu-throttling: "false"
+        run.googleapis.com/startup-cpu-boost: "true"
+        run.googleapis.com/execution-environment: gen2
+        
+        # VPC configuration (if needed)
+        # run.googleapis.com/vpc-access-connector: projects/smelteros/locations/us-central1/connectors/smelteros-vpc
+        # run.googleapis.com/vpc-access-egress: private-ranges-only
+        
+    spec:
+      containerConcurrency: 80
+      timeoutSeconds: 300
+      serviceAccountName: smelteros-runner@smelteros.iam.gserviceaccount.com
+      
+      containers:
+        - name: smelteros
+          image: gcr.io/smelteros/smelteros:latest
+          
+          ports:
+            - name: http1
+              containerPort: 8080
+          
+          resources:
+            limits:
+              cpu: "2"
+              memory: 2Gi
+            requests:
+              cpu: "1"
+              memory: 1Gi
+          
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: PORT
+              value: "8080"
+            - name: HOST
+              value: "0.0.0.0"
+            - name: GCP_PROJECT_ID
+              value: smelteros
+            - name: GCP_REGION
+              value: us-central1
+            - name: LOG_LEVEL
+              value: info
+            
+            # Secrets from Secret Manager
+            - name: FIREBASE_SERVICE_ACCOUNT
+              valueFrom:
+                secretKeyRef:
+                  name: firebase-service-account
+                  key: latest
+            - name: ELEVENLABS_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: elevenlabs-api-key
+                  key: latest
+            - name: DEEPGRAM_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: deepgram-api-key
+                  key: latest
+          
+          # Startup probe - allows time for initialization
+          startupProbe:
+            httpGet:
+              path: /health/live
+              port: 8080
+            initialDelaySeconds: 0
+            periodSeconds: 2
+            timeoutSeconds: 2
+            failureThreshold: 30
+          
+          # Liveness probe - restart if unhealthy
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 8080
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          
+          # Readiness probe - receive traffic only when ready
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 8080
+            initialDelaySeconds: 0
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+
+  # Traffic configuration
+  traffic:
+    - percent: 100
+      latestRevision: true
+
+---
+# Worker Service for Pub/Sub Processing
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: smelteros-workers
+  namespace: smelteros
+  labels:
+    app: smelteros
+    tier: workers
+    environment: production
+  annotations:
+    run.googleapis.com/description: "SmelterOS Async Worker Fleet"
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/minScale: "1"
+        autoscaling.knative.dev/maxScale: "50"
+        run.googleapis.com/cpu-throttling: "false"
+        run.googleapis.com/execution-environment: gen2
+        
+    spec:
+      containerConcurrency: 10
+      timeoutSeconds: 600
+      serviceAccountName: smelteros-worker@smelteros.iam.gserviceaccount.com
+      
+      containers:
+        - name: smelteros-worker
+          image: gcr.io/smelteros/smelteros:latest
+          
+          args: ["node", "build/worker-entry.js"]
+          
+          resources:
+            limits:
+              cpu: "2"
+              memory: 4Gi
+            requests:
+              cpu: "1"
+              memory: 2Gi
+          
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: WORKER_MODE
+              value: "true"
+            - name: GCP_PROJECT_ID
+              value: smelteros
+            - name: GCP_REGION
+              value: us-central1
+            
+            - name: FIREBASE_SERVICE_ACCOUNT
+              valueFrom:
+                secretKeyRef:
+                  name: firebase-service-account
+                  key: latest
+          
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            periodSeconds: 5
+            failureThreshold: 12
+          
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            periodSeconds: 30
+            failureThreshold: 3
+
+  traffic:
+    - percent: 100
+      latestRevision: true

@@ -1,0 +1,142 @@
+# SmelterOS Local Development Environment
+# Run with: docker-compose up -d
+
+version: '3.8'
+
+services:
+  # ==========================================================================
+  # PostgreSQL Database
+  # ==========================================================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: smelter-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: smelter_os
+      POSTGRES_USER: smelter
+      POSTGRES_PASSWORD: smelter_dev_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U smelter -d smelter_os"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ==========================================================================
+  # Redis Cache
+  # ==========================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: smelter-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ==========================================================================
+  # Firebase Emulator (for local Firestore)
+  # ==========================================================================
+  firebase:
+    image: andreysenov/firebase-tools:latest
+    container_name: smelter-firebase
+    restart: unless-stopped
+    ports:
+      - "4000:4000"   # Emulator UI
+      - "8080:8080"   # Firestore
+      - "9099:9099"   # Auth
+      - "9199:9199"   # Storage
+    volumes:
+      - ./firebase.json:/home/node/firebase.json:ro
+      - firebase_data:/home/node/.firebase
+    command: firebase emulators:start --only firestore,auth,storage --project smelter-os-dev
+    environment:
+      - FIREBASE_PROJECT=smelter-os-dev
+
+  # ==========================================================================
+  # SmelterOS API (Development)
+  # ==========================================================================
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: smelter-api
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./src:/app/src:ro
+      - ./build:/app/build
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=smelter_os
+      - POSTGRES_USER=smelter
+      - POSTGRES_PASSWORD=smelter_dev_password
+      - REDIS_URL=redis://redis:6379
+      - FIRESTORE_EMULATOR_HOST=firebase:8080
+      - FIREBASE_AUTH_EMULATOR_HOST=firebase:9099
+      - FIREBASE_STORAGE_EMULATOR_HOST=firebase:9199
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # ==========================================================================
+  # pgAdmin (Database Management UI)
+  # ==========================================================================
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: smelter-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@smelter.os
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+    profiles:
+      - tools
+
+  # ==========================================================================
+  # Redis Commander (Cache Management UI)
+  # ==========================================================================
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: smelter-redis-commander
+    restart: unless-stopped
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    ports:
+      - "8081:8081"
+    depends_on:
+      - redis
+    profiles:
+      - tools
+
+volumes:
+  postgres_data:
+  redis_data:
+  firebase_data:
+  pgadmin_data:
+
+networks:
+  default:
+    name: smelter-network

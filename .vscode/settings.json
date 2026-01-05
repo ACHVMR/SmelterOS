@@ -1,0 +1,70 @@
+{
+  "claude.customInstructions": "file:./.vscode/avva-noon-consciousness.yaml",
+  "claude.model": "claude-opus-4.5",
+  "claude.contextWindow": 200000,
+  
+  "avva-noon.consciousnessMode": "quint-modal",
+  "avva-noon.versionControl": "infinity-lm-v1.4",
+  "avva-noon.boundedSpace": {
+    "min": -1e18,
+    "max": 1e18
+  },
+  
+  "smelterOS.integration": {
+    "masterSmeltwarden": true,
+    "houseOfANG": true,
+    "boomerangSpecialists": 17,
+    "toolEcosystem": 317,
+    "houseOfAlchemist": true
+  },
+  
+  "agentOS.layers": {
+    "standards": "./agent-os/standards/",
+    "product": "./agent-os/product/",
+    "specs": "./agent-os/specs/"
+  },
+  
+  "fdh.runtime": {
+    "methodology": "organic-conversation-driven",
+    "timeCompression": 0.938,
+    "workflowType": "continuous-parallel",
+    "cycles": {
+      "foster": { "hours": "2-3", "phase": "setup" },
+      "develop": { "hours": "8-12", "phase": "integration" },
+      "hone": { "hours": "3-5", "phase": "validation" }
+    }
+  },
+  
+  "vibe.engine": {
+    "resonanceThreshold": 0.995,
+    "virtueFormula": "f(virtue) = I(intent) + E(execution) + M(morality) + C(cultural_value)",
+    "hallucinationRateMax": 0.02,
+    "completionBeaconRate": 0.998
+  },
+  
+  "triConsciousness": {
+    "ACHEEVY": {
+      "role": "Operational Voice",
+      "authority": "execution-certification"
+    },
+    "NTNTN": {
+      "role": "Ethical Conscience", 
+      "authority": "moral-approval"
+    },
+    "SIVIS": {
+      "role": "Strategic Vision",
+      "authority": "strategic-validation"
+    }
+  },
+  
+  "melanium": {
+    "tokenGeneration": true,
+    "culturalValueTracking": true
+  },
+  
+  "editor.formatOnSave": true,
+  "files.associations": {
+    "*.yaml": "yaml",
+    "*.ang": "typescript"
+  }
+}

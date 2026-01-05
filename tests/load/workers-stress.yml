@@ -1,0 +1,140 @@
+# Worker Stress Test Configuration
+# Artillery load test for async Pub/Sub workers
+# Tests worker throughput and message processing latency
+
+config:
+  target: "https://smelteros-workers-722121007626.us-central1.run.app"
+  phases:
+    # Initial phase
+    - duration: 30
+      arrivalRate: 10
+      name: "Initial Load"
+    
+    # Heavy load phase
+    - duration: 180
+      arrivalRate: 10
+      rampTo: 100
+      name: "Heavy Load"
+    
+    # Stress phase
+    - duration: 120
+      arrivalRate: 150
+      name: "Stress Test"
+    
+    # Recovery phase
+    - duration: 60
+      arrivalRate: 20
+      name: "Recovery"
+
+  defaults:
+    headers:
+      Content-Type: "application/json"
+      Authorization: "Bearer {{ $processEnvironment.AUTH_TOKEN }}"
+
+  plugins:
+    expect: {}
+    metrics-by-endpoint: {}
+
+  ensure:
+    p95: 100       # Workers can have slightly higher latency
+    maxErrorRate: 0.5  # Allow higher error rate for stress test
+
+  http:
+    timeout: 60
+    pool: 200
+
+scenarios:
+  # Worker health checks
+  - name: "Worker Health"
+    weight: 20
+    flow:
+      - get:
+          url: "/health"
+          expect:
+            - statusCode: 200
+      
+      - get:
+          url: "/health/ready"
+          expect:
+            - statusCode: 200
+      
+      - get:
+          url: "/metrics"
+          expect:
+            - statusCode: 200
+
+  # ACHEEVY init simulation
+  - name: "ACHEEVY Init Messages"
+    weight: 20
+    flow:
+      - post:
+          url: "/api/v1/internal/simulate/acheevy-init"
+          json:
+            sessionId: "stress-session-{{ $randomString(8) }}"
+            userId: "stress-user-{{ $randomNumber(1, 100) }}"
+            layers:
+              - "standards"
+              - "product"
+              - "specs"
+          expect:
+            - statusCode: 202
+
+  # Proof gate validation simulation
+  - name: "Proof Gate Messages"
+    weight: 15
+    flow:
+      - post:
+          url: "/api/v1/internal/simulate/proof-gate"
+          json:
+            conversationId: "stress-conv-{{ $randomString(8) }}"
+            phase: "verify"
+            requirements:
+              - id: "req-1"
+                description: "Test requirement"
+                priority: "must"
+          expect:
+            - statusCode: 202
+
+  # Vision processing simulation
+  - name: "Vision Processing Messages"
+    weight: 15
+    flow:
+      - post:
+          url: "/api/v1/internal/simulate/vision"
+          json:
+            correlationId: "stress-vision-{{ $randomString(8) }}"
+            operation: "analyze"
+            imageUri: "gs://smelteros-artifacts/test/sample.jpg"
+          expect:
+            - statusCode: 202
+
+  # File processing simulation
+  - name: "File Processing Messages"
+    weight: 15
+    flow:
+      - post:
+          url: "/api/v1/internal/simulate/file"
+          json:
+            correlationId: "stress-file-{{ $randomString(8) }}"
+            operation: "extract"
+            fileUri: "gs://smelteros-artifacts/test/sample.pdf"
+            mimeType: "application/pdf"
+          expect:
+            - statusCode: 202
+
+  # Alert processing simulation
+  - name: "Alert Messages"
+    weight: 15
+    flow:
+      - post:
+          url: "/api/v1/internal/simulate/alert"
+          json:
+            alertId: "stress-alert-{{ $randomString(8) }}"
+            severity: "warning"
+            category: "performance"
+            title: "Stress test alert"
+            message: "This is a stress test alert message"
+            channels:
+              - "slack"
+          expect:
+            - statusCode: 202

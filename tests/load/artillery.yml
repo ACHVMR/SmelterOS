@@ -1,0 +1,202 @@
+# Load Testing Configuration
+# Artillery load test suite for SmelterOS production validation
+# Target: p95 < 50ms, < 0.1% error rate
+
+config:
+  target: "https://smelteros-api-722121007626.us-central1.run.app"
+  phases:
+    # Warm-up phase
+    - duration: 60
+      arrivalRate: 5
+      name: "Warm-up"
+    
+    # Ramp-up phase
+    - duration: 120
+      arrivalRate: 5
+      rampTo: 50
+      name: "Ramp-up"
+    
+    # Sustained load phase
+    - duration: 300
+      arrivalRate: 50
+      name: "Sustained Load"
+    
+    # Spike test phase
+    - duration: 60
+      arrivalRate: 100
+      name: "Spike Test"
+    
+    # Cool-down phase
+    - duration: 60
+      arrivalRate: 10
+      name: "Cool-down"
+
+  defaults:
+    headers:
+      Content-Type: "application/json"
+      Authorization: "Bearer {{ $processEnvironment.AUTH_TOKEN }}"
+
+  plugins:
+    expect: {}
+    metrics-by-endpoint: {}
+
+  # Ensure we measure what matters
+  ensure:
+    p95: 50        # p95 latency must be under 50ms
+    maxErrorRate: 0.1  # Error rate must be under 0.1%
+
+  # HTTP settings
+  http:
+    timeout: 30
+    pool: 100
+
+scenarios:
+  # Health check scenario - should be fastest
+  - name: "Health Check"
+    weight: 10
+    flow:
+      - get:
+          url: "/health"
+          expect:
+            - statusCode: 200
+            - contentType: "application/json"
+
+  # Session initialization scenario
+  - name: "Create Session"
+    weight: 15
+    flow:
+      - post:
+          url: "/api/v1/sessions"
+          json:
+            userId: "load-test-user-{{ $randomNumber(1, 1000) }}"
+          capture:
+            - json: "$.sessionId"
+              as: "sessionId"
+          expect:
+            - statusCode: 201
+            - hasProperty: "sessionId"
+      
+      - get:
+          url: "/api/v1/sessions/{{ sessionId }}"
+          expect:
+            - statusCode: 200
+
+  # Agent routing scenario
+  - name: "Agent Routing"
+    weight: 25
+    flow:
+      - post:
+          url: "/api/v1/sessions"
+          json:
+            userId: "load-test-user-{{ $randomNumber(1, 1000) }}"
+          capture:
+            - json: "$.sessionId"
+              as: "sessionId"
+      
+      - post:
+          url: "/api/v1/agents/route"
+          json:
+            sessionId: "{{ sessionId }}"
+            intent: "implement"
+            content: "Create a new user service with CRUD operations"
+          expect:
+            - statusCode: 200
+            - hasProperty: "routingDecision"
+            - hasProperty: "taskId"
+
+  # Task execution scenario
+  - name: "Execute Task"
+    weight: 20
+    flow:
+      - post:
+          url: "/api/v1/sessions"
+          json:
+            userId: "load-test-user-{{ $randomNumber(1, 1000) }}"
+          capture:
+            - json: "$.sessionId"
+              as: "sessionId"
+      
+      - post:
+          url: "/api/v1/agents/execute"
+          json:
+            sessionId: "{{ sessionId }}"
+            conversationId: "conv-{{ $randomString(8) }}"
+            intent: "research"
+            content: "Analyze best practices for API design"
+            waitForResult: false
+          capture:
+            - json: "$.taskId"
+              as: "taskId"
+          expect:
+            - statusCode: 200
+            - hasProperty: "taskId"
+      
+      - get:
+          url: "/api/v1/tasks/{{ taskId }}"
+          expect:
+            - statusCode: 200
+
+  # Firestore query scenario
+  - name: "Firestore Queries"
+    weight: 15
+    flow:
+      - get:
+          url: "/api/v1/tasks?status=pending&limit=10"
+          expect:
+            - statusCode: 200
+      
+      - get:
+          url: "/api/v1/tasks?status=completed&limit=10"
+          expect:
+            - statusCode: 200
+
+  # Full conversation scenario
+  - name: "Full Conversation Flow"
+    weight: 15
+    flow:
+      - post:
+          url: "/api/v1/sessions"
+          json:
+            userId: "load-test-user-{{ $randomNumber(1, 1000) }}"
+          capture:
+            - json: "$.sessionId"
+              as: "sessionId"
+      
+      # First message - research
+      - post:
+          url: "/api/v1/agents/execute"
+          json:
+            sessionId: "{{ sessionId }}"
+            conversationId: "conv-{{ $randomString(8) }}"
+            intent: "research"
+            content: "What are the best practices for microservices?"
+          capture:
+            - json: "$.taskId"
+              as: "taskId1"
+      
+      - think: 1
+      
+      # Second message - coding
+      - post:
+          url: "/api/v1/agents/execute"
+          json:
+            sessionId: "{{ sessionId }}"
+            conversationId: "conv-{{ $randomString(8) }}"
+            intent: "code"
+            content: "Generate a TypeScript interface for a User entity"
+          capture:
+            - json: "$.taskId"
+              as: "taskId2"
+      
+      # Check task statuses
+      - get:
+          url: "/api/v1/tasks/{{ taskId1 }}"
+      
+      - get:
+          url: "/api/v1/tasks/{{ taskId2 }}"
+      
+      # End session
+      - delete:
+          url: "/api/v1/sessions/{{ sessionId }}"
+          expect:
+            - statusCode: 204

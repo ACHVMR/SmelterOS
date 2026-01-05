@@ -1,0 +1,27 @@
+# SmelterOS Development Dockerfile
+# Hot-reload enabled for local development
+
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install development tools
+RUN apk add --no-cache python3 make g++
+
+# Copy package files
+COPY package*.json ./
+
+# Install all dependencies (including dev)
+RUN npm ci
+
+# Copy TypeScript config
+COPY tsconfig*.json ./
+
+# Source will be mounted as volume
+# Build will be output to /app/build
+
+# Expose development port
+EXPOSE 3000
+
+# Development command with watch mode
+CMD ["npm", "run", "dev"]

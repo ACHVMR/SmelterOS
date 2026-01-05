@@ -1,0 +1,103 @@
+{
+  "name": "smelter-circuitbox",
+  "displayName": "SmelterOS Circuit Box",
+  "description": "Real-time monitoring dashboard for SmelterOS-ORACLE agents and sandboxes",
+  "version": "1.0.0",
+  "publisher": "achievemor",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other",
+    "Visualization"
+  ],
+  "activationEvents": [
+    "onCommand:smelter.openCircuitBox",
+    "onCommand:smelter.refreshMetrics"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "smelter.openCircuitBox",
+        "title": "Open Circuit Box Dashboard",
+        "category": "SmelterOS"
+      },
+      {
+        "command": "smelter.refreshMetrics",
+        "title": "Refresh Metrics",
+        "category": "SmelterOS"
+      },
+      {
+        "command": "smelter.deployAgents",
+        "title": "Deploy All Agents",
+        "category": "SmelterOS"
+      },
+      {
+        "command": "smelter.runEthicsGate",
+        "title": "Run Ethics Gate Check",
+        "category": "SmelterOS"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "smelter-circuitbox",
+          "title": "SmelterOS",
+          "icon": "resources/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "smelter-circuitbox": [
+        {
+          "id": "smelter.agents",
+          "name": "ORACLE Agents"
+        },
+        {
+          "id": "smelter.sandboxes",
+          "name": "Sandboxes"
+        },
+        {
+          "id": "smelter.metrics",
+          "name": "Metrics"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "SmelterOS Circuit Box",
+      "properties": {
+        "smelter.cloudRunUrl": {
+          "type": "string",
+          "default": "https://smelter-workers-132049061623.us-central1.run.app",
+          "description": "Cloud Run service URL"
+        },
+        "smelter.refreshInterval": {
+          "type": "number",
+          "default": 30000,
+          "description": "Metrics refresh interval (ms)"
+        },
+        "smelter.virtueThreshold": {
+          "type": "number",
+          "default": 0.995,
+          "description": "Virtue alignment threshold"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.3.0",
+    "@vscode/vsce": "^2.22.0"
+  },
+  "dependencies": {
+    "node-fetch": "^3.3.0"
+  }
+}
