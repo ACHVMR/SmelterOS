@@ -1,7 +1,7 @@
 @import "tw-animate-css";
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss/preflight";
+@import "tailwindcss/utilities";
+
 
 /* ═══════════════════════════════════════════════════════════════════════════
    SMELTEROS DESIGN SYSTEM - Fresh Foundation
@@ -153,8 +153,8 @@ body {
 
 .bg-glass {
   background: var(--glass-bg);
-  backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
 }
 
 .bg-glass-hover:hover {
@@ -216,8 +216,8 @@ body {
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
   border-radius: 16px;
-  backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
