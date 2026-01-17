@@ -18,35 +18,45 @@ interface Product {
 
 const products: Product[] = [
   {
-    id: "chickenhawk",
-    name: "CHICKEN HAWK",
-    icon: "🦅",
-    tagline: "Autonomous Operations Framework",
-    description: "Battle-tested autonomous agent architecture for enterprise-grade AI operations. Execute complex workflows with military precision.",
-    href: "/chickenhawk",
-    color: "#DC2626",
-    glowClass: "card-product-chickenhawk",
-    logo: "/chickenhawk-logo.png"
+    id: "acheevy",
+    name: "ACHEEVY",
+    icon: "⚡",
+    tagline: "SmelterOS Orchestrator",
+    description: "The command center that orchestrates all AI operations. Couples with AVVA NOON to ensure agents never go off the rails.",
+    href: "/acheevy",
+    color: "#8B5CF6",
+    glowClass: "card-product-acheevy"
   },
   {
     id: "avva-noon",
     name: "AVVA NOON",
     icon: "🧠",
     tagline: "AI Consciousness Engine",
-    description: "The neural core powering intelligent decision-making. V.I.B.E. alignment and quint-modal sensory processing.",
+    description: "The language model that powers intelligent reasoning. V.I.B.E. alignment ensures outputs stay on track.",
     href: "/avva-noon",
     color: "#00C2B2",
     glowClass: "card-product-avva"
   },
   {
-    id: "adk-agents",
-    name: "ADK AGENTS",
-    icon: "⚙️",
-    tagline: "Agent Development Kit",
-    description: "Build, deploy, and orchestrate AI agents at scale. 17 specialized Boomer_Ang agents ready for deployment.",
-    href: "/foundry",
-    color: "#22C55E",
-    glowClass: "card-product-adk"
+    id: "chickenhawk",
+    name: "CHICKEN HAWK",
+    icon: "🦅",
+    tagline: "Autonomous Ops Framework",
+    description: "Execute complex workflows with military precision. The Ralph Wiggum Loop ensures continuous operation.",
+    href: "/chickenhawk",
+    color: "#DC2626",
+    glowClass: "card-product-chickenhawk",
+    logo: "/chickenhawk-logo.png"
+  },
+  {
+    id: "boomerangs",
+    name: "BOOMER_ANGS",
+    icon: "🪃",
+    tagline: "Specialized AI Agents",
+    description: "17+ specialized agents forged in real-time via ADK/UCP. Each Boomer_Ang returns with results.",
+    href: "/foundry#agents",
+    color: "#F59E0B",
+    glowClass: "card-product-boomerang"
   }
 ]
 
@@ -75,15 +85,15 @@ export function ProductShowcase({ className = "" }: ProductShowcaseProps) {
         </p>
       </motion.div>
 
-      {/* Product grid */}
-      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
+      {/* Product grid - 2x2 for 4 products */}
+      <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
         {products.map((product, index) => (
           <motion.div
             key={product.id}
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: index * 0.15 }}
+            transition={{ duration: 0.5, delay: index * 0.1 }}
           >
             <Link href={product.href}>
               <div className={`card-foundry ${product.glowClass} p-8 h-full cursor-pointer group`}>

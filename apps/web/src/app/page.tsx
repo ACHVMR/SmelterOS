@@ -1,6 +1,6 @@
 "use client"
 
-import { FoundryHero, ProductShowcase, ForgeProcess, SystemTelemetry } from "@/components/landing"
+import { FoundryHero, ProductShowcase, ForgeProcess, SystemTelemetry, AgentForge } from "@/components/landing"
 
 /* ═══════════════════════════════════════════════════════════════════════════
    SMELTEROS LANDING PAGE
@@ -8,7 +8,10 @@ import { FoundryHero, ProductShowcase, ForgeProcess, SystemTelemetry } from "@/c
    
    Architecture:
    - SmelterOS = The Platform (The Foundry)
-   - Products = Creations forged by SmelterOS (Chicken Hawk, AVVA NOON, etc.)
+   - ACHEEVY = Orchestrator (couples with AVVA NOON)
+   - AVVA NOON = Language Model (keeps agents on track)
+   - Chicken Hawk = Autonomous Ops Framework
+   - Boomer_Angs = AI Agents created via ADK/UCP
    ═══════════════════════════════════════════════════════════════════════════ */
 
 export default function Home() {
@@ -20,11 +23,15 @@ export default function Home() {
       {/* Hero Section - Full viewport */}
       <FoundryHero />
 
-      {/* Product Showcase - Forged Creations */}
+      {/* Product Showcase - ACHEEVY, AVVA NOON, Chicken Hawk, Boomer_Angs */}
       <ProductShowcase className="bg-[var(--foundry-850)]" />
 
       {/* Forge Process - SMELT → REFINE → DEPLOY */}
       <ForgeProcess />
+
+      {/* Agent Forge - Prompt-to-Agent Creation */}
+      <AgentForge className="bg-[var(--foundry-850)]" />
+
 
       {/* Capabilities Section */}
       <section className="relative py-32 px-6 bg-[var(--foundry-850)]">

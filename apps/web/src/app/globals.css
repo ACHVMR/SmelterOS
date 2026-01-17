@@ -42,12 +42,14 @@
   /* ─────────────────────────────────────────────────────────────────────────
      PRODUCT COLORS - Unique Identity per Product
      ───────────────────────────────────────────────────────────────────────── */
-  --product-chickenhawk: #DC2626;
-  --product-chickenhawk-glow: rgba(220, 38, 38, 0.4);
+  --product-acheevy: #8B5CF6;
+  --product-acheevy-glow: rgba(139, 92, 246, 0.4);
   --product-avva: #00C2B2;
   --product-avva-glow: rgba(0, 194, 178, 0.4);
-  --product-adk: #22C55E;
-  --product-adk-glow: rgba(34, 197, 94, 0.4);
+  --product-chickenhawk: #DC2626;
+  --product-chickenhawk-glow: rgba(220, 38, 38, 0.4);
+  --product-boomerang: #F59E0B;
+  --product-boomerang-glow: rgba(245, 158, 11, 0.4);
   
   /* ─────────────────────────────────────────────────────────────────────────
      TYPOGRAPHY
@@ -226,9 +228,9 @@ body {
 }
 
 /* Product-specific card glows */
-.card-product-chickenhawk:hover {
-  border-color: var(--product-chickenhawk);
-  box-shadow: 0 20px 60px var(--product-chickenhawk-glow);
+.card-product-acheevy:hover {
+  border-color: var(--product-acheevy);
+  box-shadow: 0 20px 60px var(--product-acheevy-glow);
 }
 
 .card-product-avva:hover {
@@ -236,10 +238,16 @@ body {
   box-shadow: 0 20px 60px var(--product-avva-glow);
 }
 
-.card-product-adk:hover {
-  border-color: var(--product-adk);
-  box-shadow: 0 20px 60px var(--product-adk-glow);
+.card-product-chickenhawk:hover {
+  border-color: var(--product-chickenhawk);
+  box-shadow: 0 20px 60px var(--product-chickenhawk-glow);
 }
+
+.card-product-boomerang:hover {
+  border-color: var(--product-boomerang);
+  box-shadow: 0 20px 60px var(--product-boomerang-glow);
+}
+
 
 /* ═══════════════════════════════════════════════════════════════════════════
    BUTTON STYLES
