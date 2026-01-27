@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+:root {
+  /* Matrix/Terminal Palette */
+  --obsidian: #0A0A0A;
+  --terminal-green: #00FF41;
+  --pure-white: #FFFFFF;
+  
+  --background: var(--obsidian);
+  --foreground: var(--pure-white);
+  
+  /* Placeholder for font variables injected by Next.js */
+}
+
+@theme inline {
+  --color-obsidian: var(--obsidian);
+  --color-terminal-green: var(--terminal-green);
+  --color-pure-white: var(--pure-white);
+  
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}

@@ -1,0 +1,87 @@
+{
+  "agent_configuration": {
+    "primary_provider": "openrouter",
+    "model": "glw/glm-4-flash",
+    "fallback_provider": "vertex_ai",
+    "fallback_model": "gemini-2.0-flash-001",
+    "temperature": 0.2,
+    "context_window": "128K",
+    "max_tokens": 8192,
+    "tools": [
+      {
+        "name": "avva-noon",
+        "endpoint": "http://avva-noon:8080/execute",
+        "description": "AVVA NOON governance - routes tasks through validation pipeline."
+      },
+      {
+        "name": "ii-agent",
+        "endpoint": "http://ii-agent:8080/run",
+        "description": "ACHEEVY - General purpose code execution and file manipulation."
+      },
+      {
+        "name": "agent-zero",
+        "endpoint": "http://agent-zero:80/api/chat",
+        "description": "Agent Zero - Complex reasoning and multi-step workflows."
+      },
+      {
+        "name": "ii-researcher",
+        "endpoint": "http://ii-researcher:8000/research",
+        "description": "Deep web search for documentation and architectural patterns."
+      },
+      {
+        "name": "codex",
+        "endpoint": "http://codex:8080/query",
+        "description": "Code knowledge base and pattern retrieval."
+      },
+      {
+        "name": "firebase-deploy",
+        "command": "firebase deploy --only hosting,functions",
+        "description": "Deploys current build to SmelterOS production."
+      },
+      {
+        "name": "opencode",
+        "command": "opencode",
+        "type": "local_agent",
+        "description": "OpenCode - AI-powered terminal coding agent for rapid code changes and analysis."
+      }
+    ]
+  },
+  "llm_providers": {
+    "openrouter": {
+      "base_url": "https://openrouter.ai/api/v1",
+      "models": {
+        "default": "glw/glm-4-flash",
+        "reasoning": "deepseek/deepseek-r1",
+        "creative": "anthropic/claude-3.5-sonnet",
+        "fast": "google/gemini-2.0-flash-001"
+      }
+    },
+    "vertex_ai": {
+      "project_id": "${GCP_PROJECT_ID}",
+      "location": "${GCP_LOCATION:-us-central1}",
+      "models": {
+        "default": "gemini-2.0-flash-001",
+        "pro": "gemini-1.5-pro-002"
+      }
+    },
+    "google_ai": {
+      "models": {
+        "gemma": "gemma-2-27b-it"
+      }
+    }
+  },
+  "governance": {
+    "framework": "AVVA NOON",
+    "vibe_threshold": 0.85,
+    "compression_target": 0.90,
+    "charter_ledger": true,
+    "rtccf_required": false,
+    "halt_on_forbidden": true
+  },
+  "ui_generation": {
+    "engine": "nano-banana-pro",
+    "style_preset": "glassmorphism_v2",
+    "physics_engine": "enabled"
+  }
+}
+

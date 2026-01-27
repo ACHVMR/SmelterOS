@@ -1,0 +1,70 @@
+# AVVA NOON Cloud Run Service Configuration
+# ═══════════════════════════════════════════════════════════════════════
+# Governance + Interactions API - Routes between all agents
+# ═══════════════════════════════════════════════════════════════════════
+
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: avva-noon
+  namespace: smelteros
+  labels:
+    cloud.googleapis.com/location: us-central1
+  annotations:
+    run.googleapis.com/ingress: all
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/minScale: "0"
+        autoscaling.knative.dev/maxScale: "10"
+        run.googleapis.com/cpu-boost: "true"
+    spec:
+      containerConcurrency: 80
+      timeoutSeconds: 300
+      containers:
+        - image: us-central1-docker.pkg.dev/gen-lang-client-0618301038/smelteros/avva-noon:latest
+          ports:
+            - containerPort: 8080
+          resources:
+            limits:
+              cpu: "2"
+              memory: "2Gi"
+          env:
+            # Agent URLs (Cloud Run service discovery)
+            - name: ACHEEVY_URL
+              value: "https://ii-agent-HASH.run.app"
+            - name: AGENT_ZERO_URL
+              value: "https://agent-zero-HASH.run.app"
+            - name: II_RESEARCHER_URL
+              value: "https://ii-researcher-HASH.run.app"
+            # LLM Configuration
+            - name: OPENROUTER_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: openrouter-api-key
+                  key: latest
+            - name: DEFAULT_MODEL
+              value: "glm4-flash"
+            - name: FALLBACK_MODEL
+              value: "gemini-flash"
+            # GCP
+            - name: GCP_gen-lang-client-0618301038
+              value: "gen-lang-client-0618301038"
+            - name: GCP_LOCATION
+              value: "us-central1"
+            - name: GOOGLE_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: google-api-key
+                  key: latest
+            # Governance Thresholds
+            - name: VIBE_THRESHOLD
+              value: "0.85"
+            - name: AVVA_NOON_COMPRESSION_TARGET
+              value: "0.90"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            periodSeconds: 30

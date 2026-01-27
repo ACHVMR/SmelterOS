@@ -1,0 +1,14 @@
+.git
+.gitignore
+node_modules/
+apps/web/node_modules/
+legacy_archive/
+legacy_backend_ref/
+.next/
+out/
+build/
+dist/
+*.pyc
+__pycache__/
+.env
+.env.local

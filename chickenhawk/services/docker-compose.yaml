@@ -1,0 +1,233 @@
+version: "3.9"
+
+services:
+  # ═══════════════════════════════════════════════════════════════════════
+  # AVVA NOON - Governance & Interactions API
+  # The brain that bridges ACHEEVY, Agent Zero, and governance
+  # ═══════════════════════════════════════════════════════════════════════
+  avva-noon:
+    build: ./avva-noon
+    ports:
+      - "8095:8080"
+    environment:
+      # Agent URLs
+      - AGENT_ZERO_URL=http://agent-zero:80
+      - ACHEEVY_URL=http://ii-agent:8080
+      - ORACLE_GATEWAY_URL=http://oracle-gateway:8080
+      # LLM Configuration - OpenRouter Primary (GLM4.7)
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
+      - DEFAULT_MODEL=glm4-flash
+      - FALLBACK_MODEL=gemini-flash
+      # GCP/Vertex AI Fallback
+      - GCP_PROJECT_ID=${GCP_PROJECT_ID:-}
+      - GCP_LOCATION=${GCP_LOCATION:-us-central1}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY:-}
+      # Governance Thresholds
+      - VIBE_THRESHOLD=0.85
+      - AVVA_NOON_COMPRESSION_TARGET=0.90
+      # Logging paths
+      - AVVA_NOON_CHARTER_PATH=/app/logs/charter.log
+      - AVVA_NOON_LEDGER_PATH=/app/logs/ledger.log
+      - AVVA_NOON_REPORTS_PATH=/app/reports
+    volumes:
+      - avva-noon-logs:/app/logs
+      - avva-noon-reports:/app/reports
+    depends_on:
+      - ii-agent
+      - oracle-gateway
+    networks:
+      - chickenhawk-net
+    restart: unless-stopped
+
+  # ═══════════════════════════════════════════════════════════════════════
+  # AGENT ZERO (AVVA NOON Core) - Already running externally
+  # Container: 2b63c8ddf40e | Image: agent0ai/agent-zero:latest
+  # Connect to existing container via external network
+  # ═══════════════════════════════════════════════════════════════════════
+  agent-zero:
+    image: agent0ai/agent-zero:latest
+    ports:
+      - "50001:80"
+    environment:
+      # OpenRouter as primary LLM
+      - CHAT_MODEL_PROVIDER=openrouter
+      - CHAT_MODEL=glw/glm-4-flash
+      - UTILITY_MODEL_PROVIDER=openrouter
+      - UTILITY_MODEL=glw/glm-4-flash
+      - EMBEDDING_MODEL_PROVIDER=openai
+      - EMBEDDING_MODEL=text-embedding-3-small
+      # API Keys
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY:-}
+      # Agent Configuration
+      - AGENT_NAME=AVVA-NOON
+      - AUTO_MEMORY_COUNT=5
+    volumes:
+      - agent-zero-memory:/app/memory
+      - agent-zero-knowledge:/app/knowledge
+      - agent-zero-work:/app/work_dir
+    networks:
+      - chickenhawk-net
+    restart: unless-stopped
+
+  # ═══════════════════════════════════════════════════════════════════════
+  # ORACLE GATEWAY - Routing & Orchestration
+  # ═══════════════════════════════════════════════════════════════════════
+  oracle-gateway:
+    build: ./oracle-gateway
+    ports:
+      - "8090:8080"
+    environment:
+      - URL_AGENT_ZERO=http://agent-zero:80
+      - URL_II_RESEARCHER=http://ii-researcher:8000
+      - URL_II_AGENT=http://ii-agent:8080
+      - URL_CODEX=http://codex:8080
+      - URL_AVVA_NOON=http://avva-noon:8080
+      # LLM Configuration
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
+      - DEFAULT_MODEL=glw/glm-4-flash
+    depends_on:
+      - ii-agent
+      - codex
+    networks:
+      - chickenhawk-net
+    restart: unless-stopped
+
+  # ═══════════════════════════════════════════════════════════════════════
+  # ACHEEVY (II-Agent) - Real Intelligent Internet Agent Platform
+  # Users land here first - Full featured agentic execution
+  # Source: https://github.com/Intelligent-Internet/ii-agent
+  # ═══════════════════════════════════════════════════════════════════════
+  ii-agent:
+    build: 
+      context: ../ii-repos/ii-agent
+      dockerfile: docker/Dockerfile
+    ports:
+      - "8091:8000"
+    environment:
+      # AVVA NOON Integration
+      - AVVA_NOON_URL=http://avva-noon:8080
+      - AGENT_ZERO_URL=http://agent-zero:80
+      # LiteLLM / OpenRouter Configuration (GLM4.7 Default)
+      - LITELLM_API_KEY=${OPENROUTER_API_KEY:-}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
+      - DEFAULT_MODEL=openrouter/glw/glm-4-flash
+      - FALLBACK_MODEL=openrouter/google/gemini-2.0-flash-001
+      # Additional API Keys
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY:-}
+      # GCP / Vertex AI
+      - GCP_PROJECT_ID=${GCP_PROJECT_ID:-}
+      - GCP_LOCATION=${GCP_LOCATION:-us-central1}
+      # Database
+      - DATABASE_URL=${DATABASE_URL:-sqlite:///./data/ii_agent.db}
+    volumes:
+      - ii-agent-data:/app/data
+      - ii-agent-workspace:/app/workspace
+    networks:
+      - chickenhawk-net
+    restart: unless-stopped
+
+  # ═══════════════════════════════════════════════════════════════════════
+  # CODEX - Code Knowledge Base
+  # ═══════════════════════════════════════════════════════════════════════
+  codex:
+    build: ./codex
+    ports:
+      - "8092:8080"
+    networks:
+      - chickenhawk-net
+    restart: unless-stopped
+
+  # ═══════════════════════════════════════════════════════════════════════
+  # CONFUCIUS - Wisdom & Prompts
+  # ═══════════════════════════════════════════════════════════════════════
+  confucius:
+    build: ./confucius
+    ports:
+      - "8093:8080"
+    networks:
+      - chickenhawk-net
+    restart: unless-stopped
+
+  # ═══════════════════════════════════════════════════════════════════════
+  # BILLING BRIDGE - Stripe & Payments
+  # ═══════════════════════════════════════════════════════════════════════
+  billing-bridge:
+    build: ./billing-bridge
+    ports:
+      - "8094:8080"
+    environment:
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-sk_test_placeholder}
+      - RESEND_API_KEY=${RESEND_API_KEY:-re_placeholder}
+    networks:
+      - chickenhawk-net
+    restart: unless-stopped
+
+  # ═══════════════════════════════════════════════════════════════════════
+  # OPENCODE - Containerized AI Coding Agent
+  # Powered by Chicken Hawk harness for autonomous code generation
+  # ═══════════════════════════════════════════════════════════════════════
+  opencode:
+    build:
+      context: ../infra/opencode
+      dockerfile: Dockerfile
+    container_name: chickenhawk-opencode
+    ports:
+      - "8096:8080"
+    environment:
+      # LLM Configuration - GLM 4.7 via OpenRouter (Primary)
+      - OPENCODE_MODEL=openrouter/glw/glm-4-flash
+      - OPENCODE_FALLBACK_MODEL=openrouter/google/gemini-3-flash-thinking
+      - OPENCODE_API_KEY=${OPENROUTER_API_KEY:-}
+      - OPENCODE_AUTO_APPROVE=true
+      - OPENCODE_MAX_TOKENS=8192
+      # Integration with AVVA NOON
+      - AVVA_NOON_URL=http://avva-noon:8080
+      - ORACLE_GATEWAY_URL=http://oracle-gateway:8080
+    volumes:
+      - ../../../:/workspace:rw
+      - opencode-config:/root/.config/opencode
+    depends_on:
+      - avva-noon
+      - oracle-gateway
+    networks:
+      - chickenhawk-net
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 512M
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# VOLUMES
+# ═══════════════════════════════════════════════════════════════════════
+volumes:
+  avva-noon-logs:
+    driver: local
+  avva-noon-reports:
+    driver: local
+  agent-zero-memory:
+    driver: local
+  agent-zero-knowledge:
+    driver: local
+  agent-zero-work:
+    driver: local
+  ii-agent-data:
+    driver: local
+  ii-agent-workspace:
+    driver: local
+  opencode-config:
+    driver: local
+
+# ═══════════════════════════════════════════════════════════════════════
+# NETWORKS
+# ═══════════════════════════════════════════════════════════════════════
+networks:
+  chickenhawk-net:
+    driver: bridge

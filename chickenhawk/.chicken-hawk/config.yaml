@@ -1,0 +1,72 @@
+# Chicken Hawk Autonomous Harness Configuration
+# ═══════════════════════════════════════════════════════════════════════════
+
+harness:
+  mode: autonomous  # autonomous | supervised | dry-run
+  visual_style: retro  # retro | minimal | off
+
+# Context Management (70% Rule)
+context:
+  distill_threshold: 0.70
+  max_window_tokens: 128000
+  summary_target_tokens: 4000
+
+# Execution Settings
+execution:
+  max_retries_per_task: 5
+  git_auto_commit: true
+  timeout_seconds: 300
+
+# OpenCode Container Integration
+opencode:
+  enabled: true
+  model: openrouter/anthropic/claude-sonnet-4
+  auto_approve: true
+  max_tokens: 8192
+  container_name: chickenhawk-opencode
+  compose_file: infra/opencode/docker-compose.yaml
+  # Auto-start container when running chicken_hawk.py
+  auto_start_container: true
+
+# ORACLE Gates Configuration
+oracle_gates:
+  syntax_check: true
+  type_check: true
+  test_pass: true
+  lint_clean: true
+  security_scan: true
+  performance_baseline: true
+  documentation_complete: true
+
+# Visual Evolution Stages
+visuals:
+  hatchling_threshold: 10    # 0-10% progress
+  hunter_threshold: 80       # 10-80% progress
+  powerhouse_threshold: 100  # 80-100% progress
+
+# Human-in-the-Loop (HITL) Configuration
+hitl:
+  enabled: true
+  stationary: true  # Set to false if human is away (will send email notifications)
+  auto_approve_low_risk: true
+  timeout_minutes: 30
+  check_interval_tasks: 5  # Create checkpoint every N tasks
+  
+  # Risk detection keywords
+  high_risk_keywords:
+    - delete
+    - drop
+    - truncate
+    - production
+    - deploy
+    - credentials
+    - payment
+  
+  # Resend Email Notifications (when stationary: false)
+  resend:
+    api_key: ${RESEND_API_KEY}
+    from_email: "noreply@smelteros.com"
+    notify_email: ${HITL_NOTIFY_EMAIL}
+  
+  # Webhook (Slack/Discord)
+  webhook_url: ${HITL_WEBHOOK_URL}

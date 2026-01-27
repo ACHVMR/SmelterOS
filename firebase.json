@@ -1,19 +1,12 @@
 {
-  "firestore": {
-    "rules": "firestore.rules",
-    "indexes": "firestore.indexes.json"
-  },
   "hosting": {
-    "public": "build/public",
-    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "public": "apps/web/public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
     "rewrites": [
-      {
-        "source": "/api/**",
-        "run": {
-          "serviceId": "smelter-os",
-          "region": "us-central1"
-        }
-      },
       {
         "source": "**",
         "destination": "/index.html"
@@ -21,53 +14,39 @@
     ],
     "headers": [
       {
-        "source": "**/*.@(js|css)",
+        "source": "**/*.@(js|css|html)",
         "headers": [
           {
             "key": "Cache-Control",
-            "value": "max-age=31536000"
+            "value": "max-age=3600"
           }
         ]
       },
       {
-        "source": "**",
+        "source": "**/*.@(png|jpg|jpeg|gif|svg|webp)",
         "headers": [
           {
-            "key": "X-Frame-Options",
-            "value": "DENY"
-          },
-          {
-            "key": "X-Content-Type-Options",
-            "value": "nosniff"
-          },
-          {
-            "key": "X-XSS-Protection",
-            "value": "1; mode=block"
+            "key": "Cache-Control",
+            "value": "max-age=86400"
           }
         ]
       }
     ]
   },
-  "storage": {
-    "rules": "storage.rules"
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
   },
   "emulators": {
-    "auth": {
-      "port": 9099
+    "hosting": {
+      "port": 5000
     },
     "firestore": {
       "port": 8080
     },
-    "hosting": {
-      "port": 5000
-    },
-    "storage": {
-      "port": 9199
-    },
     "ui": {
       "enabled": true,
       "port": 4000
-    },
-    "singleProjectMode": true
+    }
   }
 }

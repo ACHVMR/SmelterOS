@@ -1,0 +1,84 @@
+# Agent Zero Cloud Run Service Configuration
+# ═══════════════════════════════════════════════════════════════════════
+# AVVA NOON Core - Complex reasoning and multi-step workflows
+# Image: agent0ai/agent-zero:latest
+# ═══════════════════════════════════════════════════════════════════════
+
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: agent-zero
+  namespace: smelteros
+  labels:
+    cloud.googleapis.com/location: us-central1
+  annotations:
+    run.googleapis.com/ingress: all
+spec:
+  template:
+    metadata:
+      annotations:
+        # Agent Zero needs persistent state - consider Cloud SQL or Firestore
+        autoscaling.knative.dev/minScale: "1"
+        autoscaling.knative.dev/maxScale: "5"
+        run.googleapis.com/cpu-boost: "true"
+        run.googleapis.com/startup-cpu-boost: "true"
+        # Extended timeout for complex tasks
+        run.googleapis.com/execution-environment: gen2
+    spec:
+      containerConcurrency: 10
+      timeoutSeconds: 3600
+      containers:
+        - image: agent0ai/agent-zero:latest
+          ports:
+            - containerPort: 80
+          resources:
+            limits:
+              cpu: "4"
+              memory: "8Gi"
+          env:
+            # OpenRouter as primary LLM
+            - name: CHAT_MODEL_PROVIDER
+              value: "openrouter"
+            - name: CHAT_MODEL
+              value: "glw/glm-4-flash"
+            - name: UTILITY_MODEL_PROVIDER
+              value: "openrouter"
+            - name: UTILITY_MODEL
+              value: "glw/glm-4-flash"
+            - name: EMBEDDING_MODEL_PROVIDER
+              value: "openai"
+            - name: EMBEDDING_MODEL
+              value: "text-embedding-3-small"
+            # API Keys from Secret Manager
+            - name: OPENROUTER_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: openrouter-api-key
+                  key: latest
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: openai-api-key
+                  key: latest
+            - name: GOOGLE_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: google-api-key
+                  key: latest
+            # Agent Configuration
+            - name: AGENT_NAME
+              value: "AVVA-NOON"
+            - name: AUTO_MEMORY_COUNT
+              value: "5"
+          volumeMounts:
+            - name: agent-memory
+              mountPath: /app/memory
+            - name: agent-knowledge
+              mountPath: /app/knowledge
+      volumes:
+        - name: agent-memory
+          emptyDir:
+            sizeLimit: "1Gi"
+        - name: agent-knowledge
+          emptyDir:
+            sizeLimit: "500Mi"

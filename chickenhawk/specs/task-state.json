@@ -1,0 +1,18 @@
+{
+  "prd_file": "specs/prd.md",
+  "version": "1.0",
+  "created_at": "2026-01-16T12:20:00Z",
+  "updated_at": "2026-01-16T12:20:00Z",
+  "tasks": [
+    {
+      "id": "task-001",
+      "title": "Initialize Chicken Hawk Framework",
+      "status": "complete",
+      "retry_count": 0,
+      "started_at": "2026-01-16T12:20:00Z",
+      "completed_at": "2026-01-16T12:20:30Z",
+      "spec_path": "specs/task-001.yaml",
+      "tokens_used": 0
+    }
+  ]
+}

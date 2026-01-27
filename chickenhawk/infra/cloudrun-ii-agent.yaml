@@ -1,0 +1,80 @@
+# II-Agent Cloud Run Service Configuration
+# ═══════════════════════════════════════════════════════════════════════
+# ACHEEVY - Primary task execution platform
+# Source: Intelligent-Internet/ii-agent (3.1k⭐)
+# ═══════════════════════════════════════════════════════════════════════
+
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: ii-agent
+  namespace: smelteros
+  labels:
+    cloud.googleapis.com/location: us-central1
+  annotations:
+    run.googleapis.com/ingress: all
+    run.googleapis.com/launch-stage: GA
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/minScale: "1"
+        autoscaling.knative.dev/maxScale: "20"
+        run.googleapis.com/cpu-boost: "true"
+        run.googleapis.com/startup-cpu-boost: "true"
+    spec:
+      containerConcurrency: 20
+      timeoutSeconds: 900
+      containers:
+        - image: us-central1-docker.pkg.dev/gen-lang-client-0618301038/smelteros/ii-agent:latest
+          ports:
+            - containerPort: 8000
+          resources:
+            limits:
+              cpu: "4"
+              memory: "4Gi"
+          env:
+            # LiteLLM / OpenRouter Configuration
+            - name: LITELLM_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: openrouter-api-key
+                  key: latest
+            - name: OPENROUTER_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: openrouter-api-key
+                  key: latest
+            - name: DEFAULT_MODEL
+              value: "openrouter/glw/glm-4-flash"
+            - name: FALLBACK_MODEL
+              value: "openrouter/google/gemini-2.0-flash-001"
+            # GCP / Vertex AI
+            - name: GOOGLE_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: google-api-key
+                  key: latest
+            - name: GCP_gen-lang-client-0618301038
+              value: "gen-lang-client-0618301038"
+            - name: GCP_LOCATION
+              value: "us-central1"
+            # Service URLs
+            - name: AVVA_NOON_URL
+              value: "https://avva-noon-HASH.run.app"
+            - name: AGENT_ZERO_URL
+              value: "https://agent-zero-HASH.run.app"
+            - name: II_RESEARCHER_URL
+              value: "https://ii-researcher-HASH.run.app"
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 30
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            periodSeconds: 30

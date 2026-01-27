@@ -1,0 +1,432 @@
+/* ========================================
+   SMELTER OS - INDUSTRIAL SCI-FI THEME
+   ======================================== */
+
+:root {
+  /* Core Colors */
+  --smelter-black: #0a0e14;
+  --smelter-dark: #0d1117;
+  --smelter-panel: #151b23;
+  --smelter-panel-light: #1a222d;
+  
+  /* Neon Accents */
+  --neon-green: #00ff88;
+  --neon-cyan: #00d4ff;
+  --neon-orange: #ff6b35;
+  --neon-yellow: #ffd700;
+  --neon-red: #ff3366;
+  --neon-purple: #9945ff;
+  
+  /* Molten Smelter Colors */
+  --molten-orange: #ff6b35;
+  --molten-gold: #ffaa00;
+  --molten-red: #ff4444;
+  
+  /* Status Colors */
+  --status-on: #00ff88;
+  --status-off: #666666;
+  --status-warning: #ffaa00;
+  --status-error: #ff3366;
+  --status-healthy: #00ff88;
+  
+  /* Text */
+  --text-primary: #ffffff;
+  --text-secondary: #8b949e;
+  --text-muted: #484f58;
+  
+  /* Gradients */
+  --gradient-panel: linear-gradient(135deg, #1a222d 0%, #0d1117 100%);
+  --gradient-metallic: linear-gradient(180deg, #2a3441 0%, #1a222d 50%, #0d1117 100%);
+  --gradient-glow-green: linear-gradient(180deg, rgba(0, 255, 136, 0.3) 0%, transparent 100%);
+  --gradient-glow-orange: linear-gradient(180deg, rgba(255, 107, 53, 0.3) 0%, transparent 100%);
+  
+  /* Shadows */
+  --glow-green: 0 0 20px rgba(0, 255, 136, 0.5), 0 0 40px rgba(0, 255, 136, 0.3);
+  --glow-cyan: 0 0 20px rgba(0, 212, 255, 0.5), 0 0 40px rgba(0, 212, 255, 0.3);
+  --glow-orange: 0 0 20px rgba(255, 107, 53, 0.5), 0 0 40px rgba(255, 107, 53, 0.3);
+  --glow-red: 0 0 20px rgba(255, 51, 102, 0.5), 0 0 40px rgba(255, 51, 102, 0.3);
+  
+  /* Panel Effects */
+  --panel-border: 1px solid rgba(0, 255, 136, 0.2);
+  --panel-border-hover: 1px solid rgba(0, 255, 136, 0.5);
+}
+
+/* ========================================
+   CIRCUIT BOARD BACKGROUND PATTERN
+   ======================================== */
+.circuit-bg {
+  position: relative;
+  background: var(--smelter-dark);
+}
+
+.circuit-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(rgba(0, 255, 136, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 136, 0.03) 1px, transparent 1px),
+    radial-gradient(circle at 25% 25%, rgba(0, 255, 136, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, rgba(0, 212, 255, 0.05) 0%, transparent 50%);
+  background-size: 50px 50px, 50px 50px, 100% 100%, 100% 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ========================================
+   INDUSTRIAL PANEL COMPONENT
+   ======================================== */
+.industrial-panel {
+  background: var(--gradient-panel);
+  border: 1px solid rgba(0, 255, 136, 0.15);
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+.industrial-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--neon-green), transparent);
+  opacity: 0.5;
+}
+
+.industrial-panel::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--neon-green);
+  box-shadow: var(--glow-green);
+}
+
+.industrial-panel:hover {
+  border-color: rgba(0, 255, 136, 0.4);
+  box-shadow: 0 0 30px rgba(0, 255, 136, 0.1);
+}
+
+/* Panel Header */
+.panel-header {
+  background: linear-gradient(90deg, rgba(0, 255, 136, 0.1), transparent);
+  border-bottom: 1px solid rgba(0, 255, 136, 0.2);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.panel-header-icon {
+  width: 8px;
+  height: 8px;
+  background: var(--neon-green);
+  border-radius: 50%;
+  box-shadow: var(--glow-green);
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.panel-header-title {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--neon-green);
+}
+
+/* ========================================
+   GLOWING ON/OFF SWITCH
+   ======================================== */
+.glow-switch {
+  position: relative;
+  width: 60px;
+  height: 28px;
+  background: linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%);
+  border: 2px solid #333;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 6px;
+  font-size: 8px;
+  font-weight: bold;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.glow-switch.active {
+  border-color: var(--neon-green);
+  box-shadow: var(--glow-green), inset 0 0 20px rgba(0, 255, 136, 0.1);
+}
+
+.glow-switch.active .switch-label-on {
+  color: var(--neon-green);
+  text-shadow: 0 0 10px var(--neon-green);
+}
+
+.glow-switch.inactive {
+  border-color: #444;
+}
+
+.glow-switch.inactive .switch-label-off {
+  color: #888;
+}
+
+.switch-indicator {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: linear-gradient(180deg, #444 0%, #222 100%);
+  border-radius: 3px;
+  transition: all 0.3s ease;
+  left: 4px;
+}
+
+.glow-switch.active .switch-indicator {
+  left: calc(100% - 24px);
+  background: linear-gradient(180deg, var(--neon-green) 0%, #00aa55 100%);
+  box-shadow: 0 0 15px var(--neon-green);
+}
+
+/* ========================================
+   STATUS INDICATOR LIGHTS
+   ======================================== */
+.status-light {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  position: relative;
+}
+
+.status-light.healthy {
+  background: var(--status-healthy);
+  box-shadow: 0 0 10px var(--status-healthy), 0 0 20px var(--status-healthy);
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.status-light.warning {
+  background: var(--status-warning);
+  box-shadow: 0 0 10px var(--status-warning), 0 0 20px var(--status-warning);
+  animation: pulse-glow 1s ease-in-out infinite;
+}
+
+.status-light.error {
+  background: var(--status-error);
+  box-shadow: 0 0 10px var(--status-error), 0 0 20px var(--status-error);
+  animation: pulse-glow 0.5s ease-in-out infinite;
+}
+
+.status-light.offline {
+  background: #333;
+  box-shadow: none;
+}
+
+/* ========================================
+   METALLIC PROGRESS BAR
+   ======================================== */
+.metallic-progress {
+  height: 8px;
+  background: linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%);
+  border: 1px solid #333;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.metallic-progress-fill {
+  height: 100%;
+  background: linear-gradient(180deg, var(--neon-green) 0%, #00aa55 100%);
+  box-shadow: 0 0 10px var(--neon-green);
+  border-radius: 3px;
+  transition: width 0.5s ease;
+  position: relative;
+}
+
+.metallic-progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.3) 0%, transparent 100%);
+}
+
+/* ========================================
+   NEON BORDER CONTAINER
+   ======================================== */
+.neon-border {
+  position: relative;
+  border: 2px solid var(--neon-green);
+  border-radius: 8px;
+  box-shadow: 
+    0 0 10px rgba(0, 255, 136, 0.3),
+    inset 0 0 30px rgba(0, 255, 136, 0.05);
+}
+
+.neon-border.orange {
+  border-color: var(--neon-orange);
+  box-shadow: 
+    0 0 10px rgba(255, 107, 53, 0.3),
+    inset 0 0 30px rgba(255, 107, 53, 0.05);
+}
+
+.neon-border.cyan {
+  border-color: var(--neon-cyan);
+  box-shadow: 
+    0 0 10px rgba(0, 212, 255, 0.3),
+    inset 0 0 30px rgba(0, 212, 255, 0.05);
+}
+
+/* ========================================
+   SYSTEM STATUS BADGE
+   ======================================== */
+.system-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: linear-gradient(90deg, rgba(0, 255, 136, 0.1), rgba(0, 255, 136, 0.05));
+  border: 1px solid var(--neon-green);
+  border-radius: 20px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--neon-green);
+  box-shadow: var(--glow-green);
+}
+
+.system-status-badge::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  background: var(--neon-green);
+  border-radius: 50%;
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* ========================================
+   EMERGENCY BUTTON
+   ======================================== */
+.emergency-button {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #ff4444 0%, #aa0000 100%);
+  border: 4px solid #660000;
+  box-shadow: 
+    0 4px 0 #440000,
+    0 0 30px rgba(255, 0, 0, 0.5),
+    inset 0 -4px 10px rgba(0, 0, 0, 0.5),
+    inset 0 4px 10px rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  transition: all 0.1s ease;
+}
+
+.emergency-button:hover {
+  box-shadow: 
+    0 4px 0 #440000,
+    0 0 50px rgba(255, 0, 0, 0.8),
+    inset 0 -4px 10px rgba(0, 0, 0, 0.5),
+    inset 0 4px 10px rgba(255, 255, 255, 0.2);
+}
+
+.emergency-button:active {
+  transform: translateY(2px);
+  box-shadow: 
+    0 2px 0 #440000,
+    0 0 30px rgba(255, 0, 0, 0.5),
+    inset 0 -2px 10px rgba(0, 0, 0, 0.5),
+    inset 0 4px 10px rgba(255, 255, 255, 0.2);
+}
+
+/* ========================================
+   ANIMATIONS
+   ======================================== */
+@keyframes pulse-glow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+@keyframes scan-line {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.95; }
+  52% { opacity: 0.9; }
+  54% { opacity: 1; }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { 
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.5), 0 0 40px rgba(0, 255, 136, 0.3);
+  }
+  50% { 
+    box-shadow: 0 0 30px rgba(0, 255, 136, 0.7), 0 0 60px rgba(0, 255, 136, 0.5);
+  }
+}
+
+/* ========================================
+   LOG TERMINAL STYLES
+   ======================================== */
+.log-terminal {
+  background: #0a0a0a;
+  border: 1px solid #333;
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  overflow: hidden;
+}
+
+.log-entry {
+  padding: 4px 12px;
+  border-bottom: 1px solid #1a1a1a;
+  display: flex;
+  gap: 12px;
+}
+
+.log-entry.info { color: var(--neon-cyan); }
+.log-entry.warning { color: var(--neon-yellow); }
+.log-entry.error { color: var(--neon-red); }
+.log-entry.alert { color: var(--neon-orange); }
+
+.log-timestamp {
+  color: #666;
+  flex-shrink: 0;
+}
+
+.log-tag {
+  font-weight: bold;
+  flex-shrink: 0;
+  width: 70px;
+}
+
+/* ========================================
+   GLASSMORPHISM CARD
+   ======================================== */
+.glass-card {
+  background: rgba(26, 34, 45, 0.8);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.glass-card:hover {
+  border-color: rgba(0, 255, 136, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 20px rgba(0, 255, 136, 0.1);
+}

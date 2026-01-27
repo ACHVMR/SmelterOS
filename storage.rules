@@ -1,0 +1,90 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function isValidFileSize(maxSizeMB) {
+      return request.resource.size < maxSizeMB * 1024 * 1024;
+    }
+    
+    function isValidImageType() {
+      return request.resource.contentType.matches('image/.*');
+    }
+    
+    function isValidAudioType() {
+      return request.resource.contentType.matches('audio/.*');
+    }
+    
+    function isValidDocumentType() {
+      return request.resource.contentType in [
+        'application/pdf',
+        'application/json',
+        'text/plain',
+        'text/markdown',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      ];
+    }
+    
+    // ═══════════════════════════════════════════════════════════════════════
+    // USER UPLOADS (Profile pictures, personal files)
+    // ═══════════════════════════════════════════════════════════════════════
+    
+    match /users/{userId}/{allPaths=**} {
+      allow read: if isAuthenticated();
+      allow write: if isOwner(userId) && isValidFileSize(10);
+    }
+    
+    // ═══════════════════════════════════════════════════════════════════════
+    // ORGANIZATION FILES
+    // ═══════════════════════════════════════════════════════════════════════
+    
+    match /organizations/{orgId}/{allPaths=**} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isValidFileSize(50);
+    }
+    
+    // ═══════════════════════════════════════════════════════════════════════
+    // PROJECT FILES
+    // ═══════════════════════════════════════════════════════════════════════
+    
+    match /projects/{projectId}/{allPaths=**} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isValidFileSize(100);
+    }
+    
+    // ═══════════════════════════════════════════════════════════════════════
+    // VOICE CACHE (TTS audio files)
+    // ═══════════════════════════════════════════════════════════════════════
+    
+    match /voice_cache/{fileId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isValidAudioType() && isValidFileSize(5);
+    }
+    
+    // ═══════════════════════════════════════════════════════════════════════
+    // PROOF ARTIFACTS (Screenshots, logs, test results)
+    // ═══════════════════════════════════════════════════════════════════════
+    
+    match /proof_artifacts/{artifactId}/{allPaths=**} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isValidFileSize(25);
+    }
+    
+    // ═══════════════════════════════════════════════════════════════════════
+    // EMBEDDINGS CACHE
+    // ═══════════════════════════════════════════════════════════════════════
+    
+    match /embeddings/{embeddingId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isValidFileSize(1);
+    }
+  }
+}

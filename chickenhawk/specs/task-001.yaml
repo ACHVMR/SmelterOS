@@ -1,0 +1,32 @@
+# Task: task-001 — Initialize Chicken Hawk Framework
+# RTCCF Format
+
+role: "Framework Architect"
+task: "Initialize the Chicken Hawk autonomous effort engine framework"
+
+context: |
+  Repository: chickenhawk/
+  Stack: Python 3.11+, YAML config, ASCII terminal UI
+  Existing: AVVA NOON validators, Oracle Gateway
+  Dependencies: PyYAML, dataclasses
+
+constraints: |
+  Security Tier: Enhanced
+  HALT on: Any deletion of existing AVVA NOON code
+  Require approval for: Changes to oracle_gates.py thresholds
+
+format: |
+  Files:
+    - chicken_hawk.py (main harness)
+    - core/oracle_gates.py (7 gates)
+    - core/state_manager.py (brain)
+    - core/rlm_distiller.py (70% rule)
+    - core/visual_evolution.py (ASCII sprites)
+    - core/token_counter.py (budget)
+  Tests:
+    - tests/test_oracle_gates.py
+    - tests/test_state_manager.py
+  Docs:
+    - docs/CHICKEN-HAWK-FRAMEWORK.md
+
+status: complete

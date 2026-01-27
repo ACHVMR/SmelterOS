@@ -1,0 +1,103 @@
+{
+  "modules": {
+    "ii-agent": {
+      "enabled": true,
+      "tiers": ["data-entry", "premium"],
+      "description": "Open-source framework to build and deploy intelligent agents",
+      "docker_image": null,
+      "service_url": null
+    },
+    "ii-researcher": {
+      "enabled": true,
+      "tiers": ["free", "data-entry", "premium"],
+      "description": "Framework for building search/research agents",
+      "docker_image": null,
+      "service_url": null
+    },
+    "agent-zero": {
+      "enabled": true,
+      "tiers": ["premium"],
+      "description": "Autonomous AI agent with Docker-based sandboxing",
+      "docker_image": "agent0ai/agent-zero",
+      "service_url": null
+    },
+    "codex": {
+      "enabled": true,
+      "tiers": ["data-entry", "premium"],
+      "description": "Lightweight coding agent (Rust)",
+      "docker_image": null,
+      "service_url": null
+    },
+    "commonground": {
+      "enabled": true,
+      "tiers": ["premium"],
+      "description": "Multi-agent collaboration platform",
+      "docker_image": null,
+      "service_url": null
+    },
+    "chronicle": {
+      "enabled": false,
+      "tiers": [],
+      "description": "Timeline/context structuring with MCP",
+      "docker_image": null,
+      "service_url": null
+    },
+    "gemini-cli": {
+      "enabled": true,
+      "tiers": ["data-entry", "premium"],
+      "description": "Gemini terminal integration",
+      "docker_image": null,
+      "service_url": null
+    },
+    "ii-commons": {
+      "enabled": true,
+      "tiers": ["premium"],
+      "description": "Dataset and embedding management tools",
+      "docker_image": null,
+      "service_url": null
+    },
+    "litellm-debugger": {
+      "enabled": true,
+      "tiers": ["premium"],
+      "description": "LLM proxy server for 100+ APIs",
+      "docker_image": null,
+      "service_url": null
+    },
+    "cot-lab": {
+      "enabled": false,
+      "tiers": [],
+      "description": "Chain of Thought cognitive alignment",
+      "docker_image": null,
+      "service_url": null
+    },
+    "pptist": {
+      "enabled": false,
+      "tiers": [],
+      "description": "Online presentation application with AIPPT",
+      "docker_image": null,
+      "service_url": null
+    }
+  },
+  "access_tiers": {
+    "free": {
+      "max_requests_per_day": 50,
+      "max_tokens_per_request": 4096,
+      "modules_enabled": ["ii-researcher"]
+    },
+    "data-entry": {
+      "max_requests_per_day": 500,
+      "max_tokens_per_request": 8192,
+      "modules_enabled": ["ii-agent", "ii-researcher", "codex", "gemini-cli"]
+    },
+    "premium": {
+      "max_requests_per_day": -1,
+      "max_tokens_per_request": 32768,
+      "modules_enabled": ["*"]
+    }
+  },
+  "super_admin": {
+    "global_kill_switch": false,
+    "maintenance_mode": false,
+    "allowed_domains": ["smelteros.com", "achievemor.com"]
+  }
+}

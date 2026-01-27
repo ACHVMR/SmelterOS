@@ -1,0 +1,102 @@
+steps:
+  # Build Oracle Gateway
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/chickenhawk-oracle', 'chickenhawk/services/oracle-gateway']
+    id: 'build-oracle'
+
+  # Build Confucius
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/chickenhawk-confucius', 'chickenhawk/services/confucius']
+    id: 'build-confucius'
+    waitFor: ['-']
+
+  # Build II-Agent
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/chickenhawk-ii-agent', 'chickenhawk/services/ii-agent']
+    id: 'build-ii-agent'
+    waitFor: ['-']
+
+  # Build Codex
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/chickenhawk-codex', 'chickenhawk/services/codex']
+    id: 'build-codex'
+    waitFor: ['-']
+
+  # Deploy Oracle Gateway to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'chickenhawk-oracle'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/chickenhawk-oracle'
+      - '--region'
+      - 'us-central1'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--set-env-vars'
+      - 'URL_II_AGENT=https://chickenhawk-ii-agent-xxxxx-uc.a.run.app,URL_CODEX=https://chickenhawk-codex-xxxxx-uc.a.run.app'
+    id: 'deploy-oracle'
+    waitFor: ['build-oracle', 'build-ii-agent', 'build-codex']
+
+  # Deploy II-Agent
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'chickenhawk-ii-agent'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/chickenhawk-ii-agent'
+      - '--region'
+      - 'us-central1'
+      - '--platform'
+      - 'managed'
+      - '--no-allow-unauthenticated'
+    id: 'deploy-ii-agent'
+    waitFor: ['build-ii-agent']
+
+  # Deploy Codex
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'chickenhawk-codex'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/chickenhawk-codex'
+      - '--region'
+      - 'us-central1'
+      - '--platform'
+      - 'managed'
+      - '--no-allow-unauthenticated'
+    id: 'deploy-codex'
+    waitFor: ['build-codex']
+
+  # Deploy Confucius
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'chickenhawk-confucius'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/chickenhawk-confucius'
+      - '--region'
+      - 'us-central1'
+      - '--platform'
+      - 'managed'
+      - '--no-allow-unauthenticated'
+    id: 'deploy-confucius'
+    waitFor: ['build-confucius']
+
+images:
+  - 'gcr.io/$PROJECT_ID/chickenhawk-oracle'
+  - 'gcr.io/$PROJECT_ID/chickenhawk-confucius'
+  - 'gcr.io/$PROJECT_ID/chickenhawk-ii-agent'
+  - 'gcr.io/$PROJECT_ID/chickenhawk-codex'
+
+options:
+  logging: CLOUD_LOGGING_ONLY

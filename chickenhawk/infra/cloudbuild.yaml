@@ -1,0 +1,179 @@
+# Cloud Run Infrastructure for SmelterOS
+# ═══════════════════════════════════════════════════════════════════════
+# Complete deployment configuration for GCP Cloud Run
+# ═══════════════════════════════════════════════════════════════════════
+
+# ═══════════════════════════════════════════════════════════════════════
+# SHARED CONFIGURATION
+# ═══════════════════════════════════════════════════════════════════════
+
+substitutions:
+  _gen-lang-client-0618301038: '${gen-lang-client-0618301038}'
+  _REGION: 'us-central1'
+  _ARTIFACT_REGISTRY: '${_REGION}-docker.pkg.dev/${_gen-lang-client-0618301038}/smelteros'
+  _OPENROUTER_API_KEY: '${OPENROUTER_API_KEY}'
+  _GOOGLE_API_KEY: '${GOOGLE_API_KEY}'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+  machineType: 'E2_HIGHCPU_8'
+
+steps:
+  # ═══════════════════════════════════════════════════════════════════════
+  # BUILD PHASE
+  # ═══════════════════════════════════════════════════════════════════════
+
+  # 1. Build AVVA NOON
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - '${_ARTIFACT_REGISTRY}/avva-noon:${SHORT_SHA}'
+      - '-t'
+      - '${_ARTIFACT_REGISTRY}/avva-noon:latest'
+      - '-f'
+      - 'chickenhawk/services/avva-noon/Dockerfile'
+      - 'chickenhawk/services/avva-noon'
+    id: 'build-avva-noon'
+
+  # 2. Build II-Agent (ACHEEVY)
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - '${_ARTIFACT_REGISTRY}/ii-agent:${SHORT_SHA}'
+      - '-t'
+      - '${_ARTIFACT_REGISTRY}/ii-agent:latest'
+      - '-f'
+      - 'chickenhawk/ii-repos/ii-agent/docker/Dockerfile'
+      - 'chickenhawk/ii-repos/ii-agent'
+    id: 'build-ii-agent'
+
+  # 3. Build II-Researcher
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - '${_ARTIFACT_REGISTRY}/ii-researcher:${SHORT_SHA}'
+      - '-t'
+      - '${_ARTIFACT_REGISTRY}/ii-researcher:latest'
+      - 'chickenhawk/ii-repos/ii-researcher'
+    id: 'build-ii-researcher'
+
+  # 4. Build CommonGround
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - '${_ARTIFACT_REGISTRY}/commonground:${SHORT_SHA}'
+      - '-t'
+      - '${_ARTIFACT_REGISTRY}/commonground:latest'
+      - 'chickenhawk/ii-repos/CommonGround'
+    id: 'build-commonground'
+
+  # ═══════════════════════════════════════════════════════════════════════
+  # PUSH PHASE
+  # ═══════════════════════════════════════════════════════════════════════
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', '--all-tags', '${_ARTIFACT_REGISTRY}/avva-noon']
+    waitFor: ['build-avva-noon']
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', '--all-tags', '${_ARTIFACT_REGISTRY}/ii-agent']
+    waitFor: ['build-ii-agent']
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', '--all-tags', '${_ARTIFACT_REGISTRY}/ii-researcher']
+    waitFor: ['build-ii-researcher']
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', '--all-tags', '${_ARTIFACT_REGISTRY}/commonground']
+    waitFor: ['build-commonground']
+
+  # ═══════════════════════════════════════════════════════════════════════
+  # DEPLOY PHASE - CLOUD RUN
+  # ═══════════════════════════════════════════════════════════════════════
+
+  # Deploy AVVA NOON
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'avva-noon'
+      - '--image=${_ARTIFACT_REGISTRY}/avva-noon:${SHORT_SHA}'
+      - '--region=${_REGION}'
+      - '--platform=managed'
+      - '--allow-unauthenticated'
+      - '--memory=2Gi'
+      - '--cpu=2'
+      - '--concurrency=80'
+      - '--min-instances=0'
+      - '--max-instances=10'
+      - '--set-env-vars=OPENROUTER_API_KEY=${_OPENROUTER_API_KEY}'
+      - '--set-env-vars=DEFAULT_MODEL=glw/glm-4-flash'
+      - '--set-env-vars=VIBE_THRESHOLD=0.85'
+
+  # Deploy II-Agent (ACHEEVY)
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'ii-agent'
+      - '--image=${_ARTIFACT_REGISTRY}/ii-agent:${SHORT_SHA}'
+      - '--region=${_REGION}'
+      - '--platform=managed'
+      - '--allow-unauthenticated'
+      - '--memory=4Gi'
+      - '--cpu=4'
+      - '--concurrency=20'
+      - '--min-instances=1'
+      - '--max-instances=20'
+      - '--timeout=900'
+      - '--set-env-vars=OPENROUTER_API_KEY=${_OPENROUTER_API_KEY}'
+      - '--set-env-vars=GOOGLE_API_KEY=${_GOOGLE_API_KEY}'
+      - '--set-env-vars=DEFAULT_MODEL=openrouter/glw/glm-4-flash'
+
+  # Deploy II-Researcher
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'ii-researcher'
+      - '--image=${_ARTIFACT_REGISTRY}/ii-researcher:${SHORT_SHA}'
+      - '--region=${_REGION}'
+      - '--platform=managed'
+      - '--allow-unauthenticated'
+      - '--memory=2Gi'
+      - '--cpu=2'
+      - '--concurrency=40'
+      - '--min-instances=0'
+      - '--max-instances=10'
+      - '--timeout=600'
+      - '--set-env-vars=OPENROUTER_API_KEY=${_OPENROUTER_API_KEY}'
+
+  # Deploy CommonGround
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'commonground'
+      - '--image=${_ARTIFACT_REGISTRY}/commonground:${SHORT_SHA}'
+      - '--region=${_REGION}'
+      - '--platform=managed'
+      - '--allow-unauthenticated'
+      - '--memory=2Gi'
+      - '--cpu=2'
+      - '--concurrency=20'
+      - '--min-instances=0'
+      - '--max-instances=5'
+
+images:
+  - '${_ARTIFACT_REGISTRY}/avva-noon:${SHORT_SHA}'
+  - '${_ARTIFACT_REGISTRY}/ii-agent:${SHORT_SHA}'
+  - '${_ARTIFACT_REGISTRY}/ii-researcher:${SHORT_SHA}'
+  - '${_ARTIFACT_REGISTRY}/commonground:${SHORT_SHA}'

@@ -2,179 +2,39 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // ═══════════════════════════════════════════════════════════════════════
-    // HELPER FUNCTIONS
-    // ═══════════════════════════════════════════════════════════════════════
-    
-    function isAuthenticated() {
-      return request.auth != null;
-    }
-    
-    function isOwner(userId) {
-      return isAuthenticated() && request.auth.uid == userId;
-    }
-    
-    function getUserData() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
-    }
-    
-    function belongsToOrg(orgId) {
-      return isAuthenticated() && getUserData().organizationId == orgId;
-    }
-    
-    function hasRole(roles) {
-      return isAuthenticated() && getUserData().role in roles;
-    }
-    
-    function isAdmin() {
-      return hasRole(['admin', 'owner']);
-    }
-    
-    function isDeveloper() {
-      return hasRole(['admin', 'owner', 'developer']);
-    }
-    
-    // ═══════════════════════════════════════════════════════════════════════
-    // USERS COLLECTION
-    // ═══════════════════════════════════════════════════════════════════════
-    
-    match /users/{userId} {
-      allow read: if isOwner(userId) || isAdmin();
-      allow create: if isAuthenticated() && request.auth.uid == userId;
-      allow update: if isOwner(userId) || isAdmin();
-      allow delete: if isAdmin();
-    }
-    
-    // ═══════════════════════════════════════════════════════════════════════
-    // ORGANIZATIONS COLLECTION
-    // ═══════════════════════════════════════════════════════════════════════
-    
-    match /organizations/{orgId} {
-      allow read: if belongsToOrg(orgId);
-      allow create: if isAuthenticated();
-      allow update: if isAdmin() && belongsToOrg(orgId);
-      allow delete: if hasRole(['owner']) && belongsToOrg(orgId);
-    }
-    
-    // ═══════════════════════════════════════════════════════════════════════
-    // PROJECTS COLLECTION
-    // ═══════════════════════════════════════════════════════════════════════
-    
-    match /projects/{projectId} {
-      allow read: if isAuthenticated() && 
-        belongsToOrg(resource.data.organizationId);
-      allow create: if isDeveloper();
-      allow update: if isDeveloper() && 
-        belongsToOrg(resource.data.organizationId);
-      allow delete: if isAdmin() && 
-        belongsToOrg(resource.data.organizationId);
-    }
-    
-    // ═══════════════════════════════════════════════════════════════════════
-    // TASKS COLLECTION
-    // ═══════════════════════════════════════════════════════════════════════
-    
+    // Task state for Chicken Hawk
     match /tasks/{taskId} {
-      allow read: if isAuthenticated();
-      allow create: if isDeveloper();
-      allow update: if isDeveloper();
-      allow delete: if isAdmin();
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.token.admin == true;
     }
     
-    // ═══════════════════════════════════════════════════════════════════════
-    // CIRCUIT STATES COLLECTION (Digital Breaker)
-    // ═══════════════════════════════════════════════════════════════════════
-    
-    match /circuitStates/{stateId} {
-      allow read: if isAuthenticated();
-      allow write: if isAdmin();
+    // HITL checkpoints
+    match /hitl/{checkpointId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
     }
     
-    match /circuitAuditLogs/{logId} {
-      allow read: if isAdmin();
-      allow create: if isAuthenticated();
-      allow update, delete: if false;
+    // Effort ledger (append-only)
+    match /ledger/{entryId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update, delete: if false; // Immutable audit trail
     }
     
-    // ═══════════════════════════════════════════════════════════════════════
-    // PROOF GATES COLLECTION
-    // ═══════════════════════════════════════════════════════════════════════
-    
-    match /proof_gates/{gateId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated();
-      allow update: if isAuthenticated();
-      allow delete: if isAdmin();
+    // Agent registry for Marketplace
+    match /agents/{agentId} {
+      allow read: if true; // Public marketplace
+      allow write: if request.auth != null && request.auth.token.admin == true;
     }
     
-    match /proof_artifacts/{artifactId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated();
-      allow update: if false;
-      allow delete: if isAdmin();
+    // User preferences
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
     }
     
-    // ═══════════════════════════════════════════════════════════════════════
-    // VOICE CACHE COLLECTION
-    // ═══════════════════════════════════════════════════════════════════════
-    
-    match /voice_cache/{cacheId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated();
-      allow update: if false;
-      allow delete: if isAdmin();
-    }
-    
-    // ═══════════════════════════════════════════════════════════════════════
-    // CONVERSATIONS COLLECTION (ACHEEVY)
-    // ═══════════════════════════════════════════════════════════════════════
-    
-    match /conversations/{conversationId} {
-      allow read: if isAuthenticated() && 
-        (resource.data.userId == request.auth.uid || isAdmin());
-      allow create: if isAuthenticated();
-      allow update: if isAuthenticated() && 
-        resource.data.userId == request.auth.uid;
-      allow delete: if isAdmin();
-      
-      match /messages/{messageId} {
-        allow read: if isAuthenticated();
-        allow create: if isAuthenticated();
-        allow update, delete: if false;
-      }
-    }
-    
-    // ═══════════════════════════════════════════════════════════════════════
-    // AUDIT LOGS COLLECTION (Immutable)
-    // ═══════════════════════════════════════════════════════════════════════
-    
-    match /auditLogs/{logId} {
-      allow read: if isAdmin();
-      allow create: if isAuthenticated();
-      allow update, delete: if false;
-    }
-    
-    // ═══════════════════════════════════════════════════════════════════════
-    // USAGE METRICS COLLECTION
-    // ═══════════════════════════════════════════════════════════════════════
-    
-    match /usage/{usageId} {
-      allow read: if isAdmin() || 
-        (isAuthenticated() && resource.data.organizationId == getUserData().organizationId);
-      allow create: if isAuthenticated();
-      allow update: if false;
-      allow delete: if false;
-    }
-    
-    // ═══════════════════════════════════════════════════════════════════════
-    // EMBEDDINGS COLLECTION (VL-JEPA)
-    // ═══════════════════════════════════════════════════════════════════════
-    
-    match /embeddings/{embeddingId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated();
-      allow update: if false;
-      allow delete: if isAdmin();
+    // Session state
+    match /sessions/{sessionId} {
+      allow read, write: if request.auth != null;
     }
   }
 }

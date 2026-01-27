@@ -1,0 +1,36 @@
+# CommonGround Cloud Run Service Configuration
+# ═══════════════════════════════════════════════════════════════════════
+# Multi-agent collaboration platform
+# Source: Intelligent-Internet/CommonGround
+# ═══════════════════════════════════════════════════════════════════════
+
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: commonground
+  namespace: smelteros
+  labels:
+    cloud.googleapis.com/location: us-central1
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/minScale: "0"
+        autoscaling.knative.dev/maxScale: "5"
+    spec:
+      containerConcurrency: 20
+      timeoutSeconds: 900
+      containers:
+        - image: us-central1-docker.pkg.dev/gen-lang-client-0618301038/smelteros/commonground:latest
+          ports:
+            - containerPort: 8000
+          resources:
+            limits:
+              cpu: "2"
+              memory: "2Gi"
+          env:
+            - name: OPENROUTER_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: openrouter-api-key
+                  key: latest

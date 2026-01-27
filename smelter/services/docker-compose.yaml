@@ -1,0 +1,72 @@
+services:
+  # AVVA N00N - The Brain (Agent Zero)
+  avva-noon:
+    image: agent0ai/agent-zero:latest
+    container_name: avva_noon
+    ports:
+      - "8001:8080"
+    environment:
+      - AGENT_NAME=AVVA_NOON
+      - II_THOUGHT_PATH=/thought
+      - COT_PATH=/cot
+      - SYMBIOISM_PATH=/symbioism
+    volumes:
+      - ../upstream/ii-thought:/thought:ro
+      - ../upstream/CoT-Lab-Demo:/cot:ro
+      - ../upstream/Symbioism-Nextra:/symbioism:ro
+    networks:
+      - smelter-net
+
+  # ACHEEVY - The Hand
+  acheevy:
+    build:
+      context: ../upstream/codex
+      dockerfile: Dockerfile
+    ports:
+      - "8002:8080"
+    environment:
+      - II_RESEARCHER_PATH=/researcher
+      - CHRONICLE_PATH=/chronicle
+      - COMMONS_PATH=/commons
+    volumes:
+      - ../upstream/ii-researcher:/researcher:ro
+      - ../upstream/Common_Chronicle:/chronicle:ro
+      - ../upstream/II-Commons:/commons:ro
+    networks:
+      - smelter-net
+
+  # Oracle Gateway - Boomerangs
+  oracle-gateway:
+    build:
+      context: ./oracle-gateway
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8080"
+    environment:
+      - LITELLM_PATH=/litellm
+      - PPTIST_PATH=/pptist
+      - GEMINI_CLI_PATH=/gemini
+      - GHOST_STORAGE_PATH=/storage
+    volumes:
+      - ../upstream/litellm-debugger:/litellm:ro
+      - ../upstream/PPTist:/pptist:ro
+      - ../upstream/gemini-cli:/gemini:ro
+      - ../upstream/ghost-gcp-storage-adapter:/storage:ro
+    networks:
+      - smelter-net
+
+  # Agent Zero - Zero_Ang (Local Bridge)
+  zero-ang:
+    image: agent0ai/agent-zero:latest
+    container_name: zero_ang
+    ports:
+      - "8003:8080"
+    environment:
+      - SMELTER_MODE=bridge
+      - AGENT_NAME=Zero_Ang
+    networks:
+      - smelter-net
+
+networks:
+  smelter-net:
+    driver: bridge

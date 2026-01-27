@@ -1,0 +1,17 @@
+{
+  "guards": {
+    "max_spend_per_session": 5.00,
+    "allowed_domains": ["api.openai.com", "api.anthropic.com", "api.google.com", "api.stripe.com"],
+    "forbidden_tools": ["system.delete_root", "network.scan_local"],
+    "require_human_approval": ["payment.execute", "infra.destroy"]
+  },
+  "routing": {
+    "default": "ii-agent",
+    "general": "ii-agent",
+    "research": "ii-researcher",
+    "code": "codex",
+    "code_execution": "ii-agent",
+    "billing": "billing-bridge",
+    "subscription": "billing-bridge"
+  }
+}

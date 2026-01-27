@@ -1,15 +1,7 @@
 {
   "projects": {
-    "default": "smelteros",
-    "production": "smelteros"
+    "default": "smelteros-chickenhawk"
   },
-  "targets": {
-    "smelteros": {
-      "hosting": {
-        "smelteros": [
-          "smelteros"
-        ]
-      }
-    }
-  }
+  "targets": {},
+  "etags": {}
 }

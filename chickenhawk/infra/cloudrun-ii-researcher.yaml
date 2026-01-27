@@ -1,0 +1,43 @@
+# II-Researcher Cloud Run Service Configuration
+# ═══════════════════════════════════════════════════════════════════════
+# Research & deep search agent
+# Source: Intelligent-Internet/ii-researcher
+# ═══════════════════════════════════════════════════════════════════════
+
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: ii-researcher
+  namespace: smelteros
+  labels:
+    cloud.googleapis.com/location: us-central1
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/minScale: "0"
+        autoscaling.knative.dev/maxScale: "10"
+    spec:
+      containerConcurrency: 40
+      timeoutSeconds: 600
+      containers:
+        - image: us-central1-docker.pkg.dev/gen-lang-client-0618301038/smelteros/ii-researcher:latest
+          ports:
+            - containerPort: 8000
+          resources:
+            limits:
+              cpu: "2"
+              memory: "2Gi"
+          env:
+            - name: OPENROUTER_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: openrouter-api-key
+                  key: latest
+            - name: GOOGLE_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: google-api-key
+                  key: latest
+            - name: DEFAULT_MODEL
+              value: "openrouter/glw/glm-4-flash"

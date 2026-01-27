@@ -1,0 +1,475 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   SmelterOS Design System
+   The official visual identity derived from the SmelterOS logo.
+   Blends professional "Modern-Zinc" layout with high-vibrancy "Molten" and "System" accents.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@layer base {
+  :root {
+    /* ══════════════════════════════════════════════════════════════════════
+       FOUNDATION COLORS
+       ══════════════════════════════════════════════════════════════════════ */
+    
+    /* Foundry Background (Zinc-950) */
+    --foundry-bg: #09090B;
+    --foundry-bg-rgb: 9 9 11;
+    
+    /* Zinc Scale */
+    --zinc-950: #09090B;
+    --zinc-900: #18181B;
+    --zinc-800: #27272A;
+    --zinc-700: #3F3F46;
+    --zinc-600: #52525B;
+    --zinc-500: #71717A;
+    --zinc-400: #A1A1AA;
+    --zinc-300: #D4D4D8;
+    --zinc-200: #E4E4E7;
+    --zinc-100: #F4F4F5;
+    --zinc-50: #FAFAFA;
+    
+    /* ══════════════════════════════════════════════════════════════════════
+       MOLTEN GRADIENT (Smelter Activities)
+       Use for: Forging, Refinement, Creation, Processing, Submit Actions
+       ══════════════════════════════════════════════════════════════════════ */
+    --molten-base: #FF4D00;
+    --molten-highlight: #FFB000;
+    --molten-deep: #E63900;
+    --molten-glow: rgba(255, 77, 0, 0.4);
+    --molten-gradient: linear-gradient(135deg, #FF4D00 0%, #FFB000 100%);
+    --molten-gradient-hover: linear-gradient(135deg, #FF5E1A 0%, #FFC21A 100%);
+    
+    /* ══════════════════════════════════════════════════════════════════════
+       SYSTEM GRADIENT (OS Activities)
+       Use for: AI Agents, System Stats, Logic, Navigation, Checks
+       ══════════════════════════════════════════════════════════════════════ */
+    --system-teal: #00C2B2;
+    --system-green: #32CD32;
+    --system-glow: rgba(0, 194, 178, 0.4);
+    --system-gradient: linear-gradient(135deg, #00C2B2 0%, #32CD32 100%);
+    --system-gradient-hover: linear-gradient(135deg, #00D4C4 0%, #42DD42 100%);
+    
+    /* ══════════════════════════════════════════════════════════════════════
+       INGOT BRONZE (Muted/Secondary)
+       Use for: Historical logs, secondary surfaces, muted elements
+       ══════════════════════════════════════════════════════════════════════ */
+    --ingot-bronze: #3D2B1F;
+    --ingot-highlight: #6B5344;
+    --ingot-gradient: linear-gradient(145deg, #4A3628 0%, #3D2B1F 100%);
+    
+    /* ══════════════════════════════════════════════════════════════════════
+       STATUS COLORS
+       ══════════════════════════════════════════════════════════════════════ */
+    --status-optimal: var(--system-gradient);
+    --status-processing: var(--molten-gradient);
+    --status-critical: #E63900;
+    --status-warning: #FFB000;
+    
+    /* ══════════════════════════════════════════════════════════════════════
+       TEXT COLORS
+       ══════════════════════════════════════════════════════════════════════ */
+    --text-primary: var(--zinc-50);
+    --text-secondary: var(--zinc-400);
+    --text-muted: var(--zinc-500);
+    
+    /* ══════════════════════════════════════════════════════════════════════
+       SHADOWS & GLOWS
+       ══════════════════════════════════════════════════════════════════════ */
+    --shadow-molten: 0 0 24px rgba(255, 77, 0, 0.4);
+    --shadow-molten-lg: 0 4px 32px rgba(255, 77, 0, 0.3);
+    --shadow-system: 0 0 20px rgba(0, 194, 178, 0.4);
+    --shadow-system-lg: 0 4px 32px rgba(0, 194, 178, 0.3);
+    --shadow-switch-on: 0 0 4px rgba(50, 205, 50, 0.8), 0 0 12px rgba(50, 205, 50, 0.4);
+    --shadow-critical: 0 0 24px rgba(230, 57, 0, 0.8);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SMELTER BUTTON STYLES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@layer components {
+  /* Smelter Button (Molten Orange) - For creation/processing actions */
+  .btn-smelter {
+    background: var(--molten-gradient);
+    color: var(--zinc-950);
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 24px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-shadow: none;
+  }
+  
+  .btn-smelter:hover {
+    background: var(--molten-gradient-hover);
+    transform: scale(1.02);
+    box-shadow: var(--shadow-molten);
+  }
+  
+  .btn-smelter:active {
+    transform: scale(0.98);
+  }
+  
+  .btn-smelter:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+  
+  /* System Button (Teal/Green) - For navigation/logic actions */
+  .btn-system {
+    background: var(--system-gradient);
+    color: var(--zinc-950);
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 24px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .btn-system:hover {
+    background: var(--system-gradient-hover);
+    filter: brightness(1.1);
+    box-shadow: var(--shadow-system);
+  }
+  
+  .btn-system:active {
+    transform: scale(0.98);
+  }
+  
+  .btn-system:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    filter: none;
+    box-shadow: none;
+  }
+  
+  /* Secondary Button (Zinc) */
+  .btn-secondary {
+    background: var(--zinc-800);
+    color: var(--zinc-50);
+    font-weight: 500;
+    border: 1px solid var(--zinc-700);
+    border-radius: 8px;
+    padding: 12px 24px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .btn-secondary:hover {
+    background: var(--zinc-700);
+    border-color: var(--zinc-600);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CARD STYLES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@layer components {
+  /* Base Card */
+  .card-smelter {
+    background: var(--zinc-800);
+    border: 1px solid var(--zinc-700);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+  }
+  
+  /* Smelter Module Card - Orange hover */
+  .card-smelter-module {
+    background: var(--zinc-800);
+    border: 2px solid transparent;
+    border-radius: 12px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .card-smelter-module:hover {
+    border-color: var(--molten-base);
+    box-shadow: var(--shadow-molten-lg);
+    transform: translateY(-2px);
+  }
+  
+  /* OS Module Card - Teal/Green hover */
+  .card-os-module {
+    background: var(--zinc-800);
+    border: 2px solid transparent;
+    border-radius: 12px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .card-os-module:hover {
+    border-color: var(--system-green);
+    box-shadow: var(--shadow-system-lg);
+    transform: translateY(-2px);
+  }
+  
+  /* Ingot Card (Bronze 3D effect) */
+  .card-ingot {
+    background: var(--ingot-gradient);
+    border-radius: 12px;
+    box-shadow: 
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      0 4px 12px rgba(0, 0, 0, 0.5);
+  }
+  
+  .card-ingot.refining {
+    background: linear-gradient(
+      to right,
+      var(--molten-base) 0%,
+      var(--molten-highlight) var(--progress, 0%),
+      var(--ingot-bronze) var(--progress, 0%)
+    );
+  }
+  
+  /* Consciousness Log Entry */
+  .log-entry-consciousness {
+    background: var(--ingot-bronze);
+    color: var(--zinc-50);
+    border-radius: 8px;
+    padding: 16px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SWITCH STYLES (Circuit Box)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@layer components {
+  .switch-smelter {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    background: var(--zinc-700);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .switch-smelter.on {
+    background: var(--system-green);
+    box-shadow: var(--shadow-switch-on);
+  }
+  
+  .switch-smelter::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    background: var(--zinc-50);
+    border-radius: 50%;
+    transition: all 0.2s ease;
+  }
+  
+  .switch-smelter.on::after {
+    left: 22px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   STATUS BADGES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@layer components {
+  .badge-optimal {
+    background: var(--system-gradient);
+    color: var(--zinc-950);
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 9999px;
+    font-size: 12px;
+  }
+  
+  .badge-processing {
+    background: var(--molten-gradient);
+    color: var(--zinc-950);
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 9999px;
+    font-size: 12px;
+  }
+  
+  .badge-critical {
+    background: var(--status-critical);
+    color: var(--zinc-50);
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 9999px;
+    font-size: 12px;
+    animation: pulse-heat 1.5s ease-in-out infinite;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TEXT EFFECTS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@layer utilities {
+  /* Molten Text Gradient */
+  .text-molten {
+    background: var(--molten-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  /* System Text Gradient */
+  .text-system {
+    background: var(--system-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  /* Synapse Active (AVVA NOON) */
+  .synapse-active {
+    stroke: var(--system-teal);
+    filter: drop-shadow(0 0 8px rgba(0, 194, 178, 0.8));
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PAGE-SPECIFIC STYLES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@layer components {
+  /* Furnace Header (Foundry Dashboard) */
+  .furnace-header {
+    background: linear-gradient(to bottom, var(--zinc-900) 0%, var(--zinc-950) 100%);
+    border-bottom: 2px solid transparent;
+    border-image: linear-gradient(90deg, transparent, var(--molten-base), transparent) 1;
+  }
+  
+  /* Molten Feed Item Animation */
+  .molten-feed-item {
+    animation: molten-drip 0.5s ease-out;
+  }
+  
+  /* Heat Map Background (House of Alchemist) */
+  .bg-heat-map {
+    background-image: 
+      radial-gradient(ellipse at 20% 30%, rgba(255, 77, 0, 0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 70%, rgba(255, 176, 0, 0.05) 0%, transparent 50%);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ANIMATIONS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@keyframes molten-drip {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+    filter: brightness(1.5);
+  }
+  50% {
+    filter: brightness(1.2);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: brightness(1);
+  }
+}
+
+@keyframes system-pulse {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(0, 194, 178, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(0, 194, 178, 0.8);
+  }
+}
+
+@keyframes pulse-heat {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 8px rgba(230, 57, 0, 0.5);
+  }
+  50% {
+    opacity: 0.85;
+    box-shadow: 0 0 24px rgba(230, 57, 0, 0.8);
+  }
+}
+
+@keyframes forge-progress {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
+@layer utilities {
+  .animate-molten-drip { animation: molten-drip 0.5s ease-out; }
+  .animate-system-pulse { animation: system-pulse 2s ease-in-out infinite; }
+  .animate-pulse-heat { animation: pulse-heat 1.5s ease-in-out infinite; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   NAVIGATION STYLES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@layer components {
+  .nav-smelter {
+    background: var(--zinc-900);
+  }
+  
+  .nav-item-smelter {
+    color: var(--zinc-400);
+    transition: all 0.2s ease;
+  }
+  
+  .nav-item-smelter:hover,
+  .nav-item-smelter.active {
+    color: var(--system-teal);
+  }
+  
+  .nav-item-smelter.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 24px;
+    background: var(--system-gradient);
+    border-radius: 0 2px 2px 0;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ALERT STYLES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@layer components {
+  .alert-critical {
+    background: linear-gradient(135deg, var(--status-critical) 0%, var(--molten-base) 100%);
+    color: var(--zinc-50);
+    border-radius: 8px;
+    padding: 12px 16px;
+    animation: pulse-heat 1.5s ease-in-out infinite;
+  }
+  
+  .alert-warning {
+    background: rgba(255, 176, 0, 0.1);
+    border: 1px solid var(--status-warning);
+    color: var(--status-warning);
+    border-radius: 8px;
+    padding: 12px 16px;
+  }
+  
+  .alert-success {
+    background: rgba(50, 205, 50, 0.1);
+    border: 1px solid var(--system-green);
+    color: var(--system-green);
+    border-radius: 8px;
+    padding: 12px 16px;
+  }
+}

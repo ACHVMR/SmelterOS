@@ -1,304 +1,183 @@
-# SmelterOS 🔥
+# 🔥 SmelterOS
 
-<p align="center">
-  <strong>The Foundry — Builder of Ingots</strong><br>
-  SmelterOS is the builder. Locale is the build.
-</p>
+**The Intelligent Agent Foundry** - Orchestrate, Validate, and Execute AI Agent Workflows
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Platform-GCP-4285F4?logo=google-cloud" alt="GCP">
-  <img src="https://img.shields.io/badge/Database-Firebase-FFCA28?logo=firebase" alt="Firebase">
-  <img src="https://img.shields.io/badge/AI-Vertex%20AI-34A853?logo=google" alt="Vertex AI">
-  <img src="https://img.shields.io/badge/Tools-Function%20Gemma%20T5-EA4335" alt="Function Gemma T5">
-</p>
+SmelterOS is a platform for managing complex AI agent operations, powered by **AVVA NOON** (Agent Zero) as the orchestration brain.
 
----
+## 🧠 What is SmelterOS?
 
-## 🌟 The Foundry Identity
-
-SmelterOS is **The Foundry** — an AI-powered manufacturing system that **smelts** raw blueprints into production-ready **Ingots** (products).
-
-### Core Philosophy
-
-> **"SmelterOS is the builder. Locale is the build."**
-
-- **Ingots** are the products SmelterOS manufactures (Locale, Todd, AchieveMor)
-- **Resources** are the Intelligent Internet repositories that power smelting
-- **Smelting** is the process of executing a blueprint into running code
-- **Gilding** is the refinement phase that adds polish and monitoring
-
-### Infrastructure Priority (HARD RULE)
-
-```
-GCP > Firebase > Vertex AI
-```
-
-This is NOT cloud agnostic. SmelterOS is built on Google Cloud Platform.
-
-| Layer | Service | Purpose |
-|-------|---------|---------|
-| **Compute** | Cloud Run | Serverless container execution |
-| **Database** | Firestore | Document storage for Vault |
-| **Messaging** | Pub/Sub | Async task orchestration |
-| **Storage** | Cloud Storage | Artifact persistence |
-| **AI/ML** | Vertex AI | Model inference, embeddings |
-| **Auth** | Firebase Auth | User authentication |
-| **Hosting** | Firebase Hosting | Web app delivery |
-
----
+SmelterOS provides a "Mission Control" interface for AI agents, giving you:
+- **Deep Visibility**: Real-time agent reasoning and execution status
+- **Cost Tracking**: Monitor token usage and API costs
+- **Multi-Agent Orchestration**: Coordinate specialized agents
+- **Safety Validation**: V.I.B.E checks outputs before delivery
+- **Sandbox Execution**: Isolated environments for code execution
 
 ## 🏗️ Architecture
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    THE FOUNDRY (SmelterOS)                  │
-│               Project: smelteros (722121007626)             │
-└─────────────────────────────────────────────────────────────┘
-                              ↓
-┌─────────────────────────────────────────────────────────────┐
-│                    INTERACTIONS API                         │
-│            (Main Conduit for ALL Communication)             │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐        │
-│  │   Session   │  │  Dispatch   │  │   Vault     │        │
-│  │  Manager    │←→│   Router    │←→│   (RAG)     │        │
-│  └─────────────┘  └─────────────┘  └─────────────┘        │
-└─────────────────────────────────────────────────────────────┘
-                              ↓
-┌─────────────────────────────────────────────────────────────┐
-│                  FUNCTION GEMMA T5                          │
-│              (The Hammer — Tool Execution)                  │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
-│  │  Firestore   │  │  Vertex AI   │  │  Cloud Run   │     │
-│  │    Tools     │  │    Tools     │  │    Tools     │     │
-│  └──────────────┘  └──────────────┘  └──────────────┘     │
-└─────────────────────────────────────────────────────────────┘
-                              ↓
-┌─────────────────────────────────────────────────────────────┐
-│                 GOOGLE FILE MANAGER (RAG)                   │
-│              (The Vault — Context Retrieval)                │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐        │
-│  │  Blueprints │  │  Artifacts  │  │  Resources  │        │
-│  │   (Specs)   │  │  (Products) │  │  (II Repos) │        │
-│  └─────────────┘  └─────────────┘  └─────────────┘        │
-└─────────────────────────────────────────────────────────────┘
-```
+### Core Services
 
----
+- **AVVA NOON (The Brain)** - Agent Zero orchestration engine
+- **ACHEEVY (The Hand)** - Execution and artifact management
+- **Oracle Gateway** - Model routing and tool integration
+- **Zero_Ang** - Development bridge
 
-## 🧩 Core Machinery
+> **Note**: AVVA NOON IS Agent Zero. It's not a wrapper - it's the official [agent0ai/agent-zero](https://hub.docker.com/r/agent0ai/agent-zero) image configured for SmelterOS.
 
-### Interactions API
-The **main conduit** for ALL model and infrastructure communication.
+See [ARCHITECTURE.md](./docs/smelter-os/ARCHITECTURE.md) for detailed documentation.
 
-```typescript
-import { getInteractionsAPI } from './src/core/interactions-api.js';
-
-const api = getInteractionsAPI();
-const session = await api.createSession('Locale');
-const result = await api.dispatch(session, {
-  target: 'firestore',
-  action: 'createCollection',
-  payload: { name: 'users' }
-});
-```
-
-### Function Gemma T5
-The **tooling engine** — SmelterOS's hammer for structured tool calling.
-
-```typescript
-import { getFunctionGemmaT5 } from './src/core/function-gemma-t5.js';
-
-const gemma = getFunctionGemmaT5();
-const result = await gemma.execute('firestore.createCollection', {
-  name: 'events',
-  schema: { /* ... */ }
-});
-```
-
-### Google File Manager (RAG)
-The **Vault** — context retrieval for Smelting operations.
-
-```typescript
-import { getFileManagerRAG } from './src/infrastructure/rag/file-manager.js';
-
-const rag = getFileManagerRAG();
-await rag.indexDocument(document);
-const context = await rag.retrieveForSmelting('user authentication', 'Locale');
-```
-
----
-
-## 📦 Ingots (Products)
-
-Ingots are the products that SmelterOS smelts and gilds.
-
-| Ingot | Description | Status |
-|-------|-------------|--------|
-| **Locale** | Location-aware social platform | 🔥 Primary Build |
-| **Todd** | AI task delegation assistant | 📋 Blueprint Ready |
-| **AchieveMor** | Gamification and achievement system | 🎮 Blueprint Ready |
-
-Each Ingot has a **Blueprint Smelting Specification** in `Ingots/<name>/<name>-Blueprint-Smelting-Spec.md`.
-
----
-
-## 🌐 Resources (Intelligent Internet)
-
-Resources are the specialized AI repositories that power Smelting.
-
-| Resource | Purpose | Capabilities |
-|----------|---------|--------------|
-| **ii-agent** | Autonomous task execution | Workflows, automation, API integration |
-| **ii-researcher** | Deep research and analysis | Market research, competitor analysis |
-| **ii-thought** | Complex reasoning | Strategic planning, problem decomposition |
-| **II-Commons** | Shared utilities | Boilerplate, patterns, validation |
-| **CoT-Lab-Demo** | Chain-of-thought reasoning | Reasoning chains, decision explanation |
-
----
-
-## 🔥 The Smelting Process
-
-### Phase 1: Smelting (Building)
-
-1. **Load Blueprint** — Parse the Ingot specification
-2. **Retrieve Context** — RAG from the Vault
-3. **Dispatch Tools** — Function Gemma T5 execution
-4. **Record Artifacts** — Store in GCS and Firestore
-
-### Phase 2: Gilding (Polishing)
-
-1. **Deploy** — Cloud Run container deployment
-2. **Monitor** — Cloud Monitoring dashboards
-3. **Validate** — Integration testing
-4. **Launch** — Firebase Hosting activation
-
----
-
-## 🚀 Getting Started
+## 🚀 Quick Start
 
 ### Prerequisites
+- Docker & Docker Compose
+- Node.js 18+ (for frontend)
+- Git
 
-- Node.js >= 18.0.0
-- Google Cloud SDK (`gcloud`)
-- Firebase CLI (`firebase-tools`)
-- TypeScript 5.3+
-
-### Installation
+### 1. Start the Services
 
 ```bash
 # Clone the repository
-git clone https://github.com/ACHVMR/SmelterOS.git
+git clone <repo-url>
 cd SmelterOS
 
-# Configure GCP
-gcloud auth login
-gcloud config set project smelteros
+# Start all services
+docker-compose -f smelter/services/docker-compose.yaml up -d
 
-# Build the project
-npm run build
+# Or start individual services
+docker-compose -f smelter/services/docker-compose.yaml up -d avva-noon
 ```
 
-### Smelt an Ingot
+### 2. Access the Services
+
+- **AVVA NOON**: http://localhost:8001
+- **ACHEEVY**: http://localhost:8002  
+- **Oracle Gateway**: http://localhost:8000
+- **Zero_Ang**: http://localhost:8003
+
+### 3. Start the Frontend
 
 ```bash
-# Load the Locale blueprint
-npm run smelt -- --ingot=Locale
+# Install dependencies
+npm install
 
-# Gild the smelted Ingot
-npm run gild -- --ingot=Locale --env=production
+# Start development server
+npm run dev
 ```
 
----
+Open http://localhost:3000 to see the SmelterOS dashboard.
 
 ## 📁 Project Structure
 
 ```
 SmelterOS/
-├── Ingots/                              # Products built by SmelterOS
-│   ├── Locale/                          # Primary product
-│   │   └── Locale-Blueprint-Smelting-Spec.md
-│   ├── Todd/                            # Task delegation assistant
-│   │   └── Todd-Blueprint-Smelting-Spec.md
-│   └── AchieveMor/                      # Gamification system
-│       └── AchieveMor-Blueprint-Smelting-Spec.md
-├── Resources/                           # Intelligent Internet repositories
-│   ├── ii-agent/                        # Autonomous agent
-│   ├── ii-researcher/                   # Research agent
-│   ├── ii-thought/                      # Reasoning agent
-│   ├── II-Commons/                      # Shared utilities
-│   └── CoT-Lab-Demo/                    # Chain-of-thought demos
+├── apps/
+│   ├── web/                    # Next.js frontend
+│   └── smelter-console/        # Terminal interface
+├── smelter/
+│   ├── services/               # Docker services
+│   └── upstream/               # Agent frameworks
+├── chickenhawk/                # Additional agents
 ├── docs/
-│   ├── FOUNDRY_PROTOCOL.md              # Core identity document
-│   └── SMELTING_GUIDE.md                # Execution manual
-├── src/
-│   ├── core/
-│   │   ├── interactions-api.ts          # Main API conduit
-│   │   ├── function-gemma-t5.ts         # Tooling engine
-│   │   └── resource-router.ts           # Resource dispatch
-│   └── infrastructure/
-│       ├── rag/
-│       │   └── file-manager.ts          # RAG backbone
-│       ├── pubsub/                      # Pub/Sub workers
-│       ├── database/                    # Firestore client
-│       └── storage/                     # GCS client
-├── package.json
-├── tsconfig.json
-└── README.md
+│   └── smelter-os/
+│       ├── ARCHITECTURE.md     # Full architecture docs
+│       └── PRODUCT.md          # Product vision
+└── docker-compose.yaml
 ```
 
----
+## 🎯 Key Features
+
+### AVVA NOON (Agent Zero)
+- Autonomous task decomposition
+- Multi-agent coordination
+- Memory and context management
+- Tool integration framework
+- Self-improving capabilities
+
+### The Console (Frontend)
+- Real-time agent monitoring
+- Cost and usage tracking
+- Artifact management
+- Command interface
+- Guild system for collaboration
+
+### The Foundry (Backend)
+- Agent orchestration
+- Safety validation (V.I.B.E)
+- Sandbox execution
+- Cloud deployment
 
 ## 🔧 Configuration
 
-### Environment Variables
+See `.env.local` for environment variables:
 
 ```bash
-# GCP Configuration (Required)
-GCP_PROJECT_ID=smelteros
-GCP_REGION=us-central1
-GCP_CREDENTIALS_PATH=/path/to/credentials.json
+# Firebase (Authentication)
+NEXT_PUBLIC_FIREBASE_API_KEY=your_key
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project
 
-# Firebase Configuration
-FIREBASE_API_KEY=your-api-key
-FIREBASE_AUTH_DOMAIN=smelteros.firebaseapp.com
-FIREBASE_PROJECT_ID=smelteros
-
-# Vertex AI Configuration
-VERTEX_AI_LOCATION=us-central1
+# Backend Services
+NEXT_PUBLIC_AVVA_NOON_URL=http://localhost:8001
+NEXT_PUBLIC_ACHEEVY_URL=http://localhost:8002
 ```
 
+## 📚 Documentation
+
+- [Architecture](./docs/smelter-os/ARCHITECTURE.md) - Service architecture and integration
+- [Product Vision](./docs/smelter-os/PRODUCT.md) - Goals and roadmap
+- [Agent Zero Docs](https://github.com/frdel/agent-zero) - Upstream documentation
+
+## 🛠️ Development
+
+```bash
+# Install dependencies
+npm install
+
+# Run development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Run linter
+npm run lint
+
+# Type check
+npm run type-check
+```
+
+## 🐳 Docker Commands
+
+```bash
+# View logs
+docker logs -f avva_noon
+
+# Restart a service
+docker-compose -f smelter/services/docker-compose.yaml restart avva-noon
+
+# Stop all services
+docker-compose -f smelter/services/docker-compose.yaml down
+
+# Pull latest Agent Zero image
+docker pull agent0ai/agent-zero:latest
+```
+
+## 🤝 Contributing
+
+SmelterOS integrates multiple open-source projects:
+- [Agent Zero](https://github.com/frdel/agent-zero) - The orchestration brain
+- [Next.js](https://nextjs.org) - Frontend framework
+- [Firebase](https://firebase.google.com) - Authentication & data
+
+## 📄 License
+
+See LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+- **Agent Zero** by frdel - The autonomous agent framework powering AVVA NOON
+- The entire Agent Zero community
+- All upstream projects in `smelter/upstream/`
+
 ---
 
-## 📊 Monitoring
-
-All Smelting operations are monitored via Google Cloud:
-
-- **Cloud Monitoring** — Metrics and dashboards
-- **Cloud Logging** — Structured logs
-- **Error Reporting** — Exception tracking
-- **Cloud Trace** — Distributed tracing
-
----
-
-## 📄 Documentation
-
-| Document | Purpose |
-|----------|---------|
-| [FOUNDRY_PROTOCOL.md](docs/FOUNDRY_PROTOCOL.md) | Core identity and protocol |
-| [SMELTING_GUIDE.md](docs/SMELTING_GUIDE.md) | Step-by-step execution manual |
-| [Locale Blueprint](Ingots/Locale/Locale-Blueprint-Smelting-Spec.md) | Locale product specification |
-| [Todd Blueprint](Ingots/Todd/Todd-Blueprint-Smelting-Spec.md) | Todd product specification |
-| [AchieveMor Blueprint](Ingots/AchieveMor/AchieveMor-Blueprint-Smelting-Spec.md) | AchieveMor specification |
-
----
-
-## 🛡️ License
-
-SmelterOS is proprietary software. All rights reserved.
-
----
-
-<p align="center">
-  <strong>SmelterOS — The Foundry</strong><br>
-  <em>Smelt. Gild. Ship.</em>
-</p>
+**Built with Agent Zero** | **Orchestrated by SmelterOS** | **Powered by AI**

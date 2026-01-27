@@ -1,0 +1,107 @@
+/* SmelterOS Design Tokens - Dark Theme */
+/* Based on reference designs: Deploy Platform, Testing Lab, Circuit Box 
+
+*/
+
+@layer base {
+  :root {
+    /* === Background Colors === */
+    --bg-primary: 10 10 10;        /* #0a0a0a - Very dark base */
+    --bg-secondary: 26 26 26;      /* #1a1a1a - Slightly lighter */
+    --bg-card: 30 30 30;           /* #1e1e1e - Card backgrounds */
+    --bg-elevated: 42 42 42;       /* #2a2a2a - Elevated surfaces */
+    --bg-hover: 51 51 51;          /* #333333 - Hover states */
+    
+    /* === Border Colors === */
+    --border-subtle: 51 51 51;     /* #333333 - Subtle borders */
+    --border-default: 64 64 64;    /* #404040 - Default borders */
+    --border-focus: 34 197 94;     /* #22c55e - Focus/active borders */
+    
+    /* === Status Colors === */
+    --status-success: 34 197 94;   /* #22c55e - Success/Active */
+    --status-warning: 234 179 8;   /* #eab308 - Warning/Pending */
+    --status-error: 239 68 68;     /* #ef4444 - Error/Failed */
+    --status-info: 59 130 246;     /* #3b82f6 - Info/Processing */
+    
+    /* === Text Colors === */
+    --text-primary: 255 255 255;   /* #ffffff - Primary text */
+    --text-secondary: 163 163 163; /* #a3a3a3 - Secondary text */
+    --text-muted: 115 115 115;     /* #737373 - Muted text */
+    --text-success: 34 197 94;     /* #22c55e - Success text */
+    --text-error: 239 68 68;       /* #ef4444 - Error text */
+    
+    /* === Accent Colors === */
+    --accent-green: 34 197 94;     /* #22c55e - Primary green */
+    --accent-cyan: 34 211 238;     /* #22d3ee - Cyan highlights */
+    --accent-orange: 251 146 60;   /* #fb923c - Orange accents */
+    --accent-purple: 168 85 247;   /* #a855f7 - Purple highlights */
+    
+    /* === Typography === */
+    --font-mono: 'JetBrains Mono', 'Consolas', 'Monaco', monospace;
+    --font-sans: 'Inter', system-ui, sans-serif;
+    
+    /* === Spacing Scale === */
+    --space-xs: 0.25rem;    /* 4px */
+    --space-sm: 0.5rem;     /* 8px */
+    --space-md: 1rem;       /* 16px */
+    --space-lg: 1.5rem;     /* 24px */
+    --space-xl: 2rem;       /* 32px */
+    --space-2xl: 3rem;      /* 48px */
+    
+    /* === Border Radius === */
+    --radius-sm: 0.375rem;  /* 6px */
+    --radius-md: 0.5rem;    /* 8px */
+    --radius-lg: 0.75rem;   /* 12px */
+    --radius-xl: 1rem;      /* 16px */
+    
+    /* === Shadows === */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+    --shadow-glow-green: 0 0 15px rgba(34, 197, 94, 0.3);
+    --shadow-glow-cyan: 0 0 15px rgba(34, 211, 238, 0.3);
+  }
+}
+
+/* === Utility Classes === */
+@layer utilities {
+  /* Status badge colors */
+  .status-active {
+    @apply bg-[--status-success]/10 text-[--status-success] border-[--status-success]/20;
+  }
+  
+  .status-pending {
+    @apply bg-[--status-warning]/10 text-[--status-warning] border-[--status-warning]/20;
+  }
+  
+  .status-failed {
+    @apply bg-[--status-error]/10 text-[--status-error] border-[--status-error]/20;
+  }
+  
+  .status-processing {
+    @apply bg-[--status-info]/10 text-[--status-info] border-[--status-info]/20;
+  }
+  
+  /* Panel containers */
+  .panel-dark {
+    @apply bg-[--bg-card] border border-[--border-default] rounded-[--radius-lg];
+  }
+  
+  .panel-elevated {
+    @apply bg-[--bg-elevated] border border-[--border-subtle] rounded-[--radius-lg];
+  }
+  
+  /* Text variations */
+  .text-mono {
+    font-family: var(--font-mono);
+  }
+  
+  /* Glow effects */
+  .glow-green {
+    box-shadow: var(--shadow-glow-green);
+  }
+  
+  .glow-cyan {
+    box-shadow: var(--shadow-glow-cyan);
+  }
+}

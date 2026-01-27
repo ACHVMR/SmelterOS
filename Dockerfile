@@ -1,66 +1,54 @@
-# SmelterOS Production Dockerfile
-# Optimized for Cloud Run with <50ms cold start
+FROM node:20-alpine AS base
 
-# =============================================================================
-# BUILD STAGE
-# =============================================================================
-FROM node:20-alpine AS builder
-
+# Install dependencies only when needed
+FROM base AS deps
+# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
+RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Install build dependencies
-RUN apk add --no-cache python3 make g++
-
-# Copy package files
-COPY package*.json ./
-COPY tsconfig*.json ./
-
-# Install all dependencies (including dev for build)
+# Install dependencies based on the preferred package manager
+COPY package.json package-lock.json* ./
 RUN npm ci
 
-# Copy source code
-COPY src/ ./src/
-COPY agent-os/ ./agent-os/
+# Rebuild the source code only when needed
+FROM base AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
 
-# Build TypeScript
+# Next.js collects completely anonymous telemetry data about general usage.
+# Learn more here: https://nextjs.org/telemetry
+# Uncomment the following line in case you want to disable telemetry during the build.
+ENV NEXT_TELEMETRY_DISABLED 1
+
 RUN npm run build
 
-# Prune dev dependencies
-RUN npm prune --production
-
-# =============================================================================
-# PRODUCTION STAGE
-# =============================================================================
-FROM node:20-alpine AS production
-
-# Security: Run as non-root user
-RUN addgroup -g 1001 -S smelter && \
-    adduser -S smelter -u 1001 -G smelter
-
+# Production image, copy all the files and run next
+FROM base AS runner
 WORKDIR /app
 
-# Copy only production artifacts
-COPY --from=builder --chown=smelter:smelter /app/node_modules ./node_modules
-COPY --from=builder --chown=smelter:smelter /app/dist ./dist
-COPY --from=builder --chown=smelter:smelter /app/package.json ./
+ENV NODE_ENV production
+# Uncomment the following line in case you want to disable telemetry during runtime.
+ENV NEXT_TELEMETRY_DISABLED 1
 
-# Copy runtime configs
-COPY --chown=smelter:smelter agent-os/ ./agent-os/
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
 
-# Set production environment
-ENV NODE_ENV=production
-ENV PORT=8080
-ENV HOST=0.0.0.0
+COPY --from=builder /app/public ./public
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:8080/health || exit 1
+# Set the correct permission for prerender cache
+RUN mkdir .next
+RUN chown nextjs:nodejs .next
 
-# Switch to non-root user
-USER smelter
+# Automatically leverage output traces to reduce image size
+# https://nextjs.org/docs/advanced-features/output-file-tracing
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-# Expose Cloud Run port
-EXPOSE 8080
+USER nextjs
 
-# Start application
-CMD ["node", "dist/server.js"]
+EXPOSE 3000
+
+ENV PORT 3000
+
+CMD ["node", "server.js"]

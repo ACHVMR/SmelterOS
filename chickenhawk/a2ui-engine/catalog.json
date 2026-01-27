@@ -1,0 +1,120 @@
+{
+  "version": "1.0.0",
+  "name": "chickenhawk-a2ui-catalog",
+  "description": "Approved UI component library for Chicken Hawk Mode A2UI rendering",
+  "components": {
+    "chart": {
+      "name": "Chart",
+      "category": "data-visualization",
+      "allowedProps": ["data", "title", "type", "width", "height", "colors"],
+      "types": ["bar", "line", "pie", "scatter", "area"],
+      "security": {
+        "sandboxed": true,
+        "allowScripts": false
+      }
+    },
+    "form": {
+      "name": "Dynamic Form",
+      "category": "input",
+      "allowedProps": ["fields", "submitLabel", "onSubmit", "validation"],
+      "fieldTypes": ["text", "email", "number", "select", "textarea", "checkbox", "date"],
+      "security": {
+        "sanitizeInput": true,
+        "csrfProtection": true
+      }
+    },
+    "table": {
+      "name": "Data Table",
+      "category": "data-display",
+      "allowedProps": ["columns", "rows", "sortable", "filterable", "pagination"],
+      "security": {
+        "escapeHtml": true
+      }
+    },
+    "card": {
+      "name": "Info Card",
+      "category": "layout",
+      "allowedProps": ["title", "content", "actions", "icon", "variant"],
+      "variants": ["default", "success", "warning", "error", "info"]
+    },
+    "code-block": {
+      "name": "Code Block",
+      "category": "developer",
+      "allowedProps": ["code", "language", "showLineNumbers", "highlight"],
+      "languages": ["javascript", "typescript", "python", "rust", "bash", "json", "yaml"]
+    },
+    "terminal": {
+      "name": "Terminal Output",
+      "category": "developer",
+      "allowedProps": ["lines", "streaming", "interactive"],
+      "security": {
+        "sandboxed": true,
+        "allowInput": false
+      }
+    },
+    "progress": {
+      "name": "Progress Indicator",
+      "category": "feedback",
+      "allowedProps": ["value", "max", "label", "variant"],
+      "variants": ["linear", "circular", "steps"]
+    },
+    "markdown": {
+      "name": "Markdown Renderer",
+      "category": "content",
+      "allowedProps": ["content", "sanitize"],
+      "security": {
+        "sanitizeHtml": true,
+        "allowedTags": ["h1", "h2", "h3", "p", "ul", "ol", "li", "code", "pre", "a", "strong", "em"]
+      }
+    },
+    "file-tree": {
+      "name": "File Tree",
+      "category": "developer",
+      "allowedProps": ["files", "onSelect", "expandedPaths"],
+      "security": {
+        "readOnly": true
+      }
+    },
+    "diff-viewer": {
+      "name": "Diff Viewer",
+      "category": "developer",
+      "allowedProps": ["oldContent", "newContent", "fileName", "language"]
+    },
+    "timeline": {
+      "name": "Timeline",
+      "category": "data-display",
+      "allowedProps": ["events", "orientation"],
+      "orientations": ["vertical", "horizontal"]
+    },
+    "booking-form": {
+      "name": "Booking Form",
+      "category": "specialized",
+      "allowedProps": ["slots", "onBook", "timezone"],
+      "security": {
+        "validateDates": true
+      }
+    }
+  },
+  "security": {
+    "contentSecurityPolicy": {
+      "defaultSrc": "'self'",
+      "scriptSrc": "'none'",
+      "styleSrc": "'self' 'unsafe-inline'"
+    },
+    "sandboxMode": true,
+    "maxComponentDepth": 10,
+    "maxComponentsPerRender": 50
+  },
+  "theming": {
+    "defaultTheme": "chickenhawk-dark",
+    "allowCustomStyles": false,
+    "cssVariables": {
+      "--a2ui-primary": "#00ff88",
+      "--a2ui-secondary": "#00d4ff",
+      "--a2ui-background": "#0a0a0a",
+      "--a2ui-surface": "rgba(255,255,255,0.05)",
+      "--a2ui-text": "#ffffff",
+      "--a2ui-border": "rgba(255,255,255,0.1)"
+    }
+  }
+}

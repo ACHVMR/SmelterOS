@@ -1,0 +1,31 @@
+{
+  "data": {
+    "directory": ".opencode"
+  },
+  "providers": {
+    "openrouter": {
+      "apiKey": "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",
+      "disabled": false
+    }
+  },
+  "agents": {
+    "coder": {
+      "model": "anthropic/claude-3.5-sonnet",
+      "maxTokens": 8000
+    },
+    "task": {
+      "model": "anthropic/claude-3.5-sonnet",
+      "maxTokens": 5000
+    },
+    "title": {
+      "model": "anthropic/claude-3.5-sonnet",
+      "maxTokens": 80
+    }
+  },
+  "shell": {
+    "path": "powershell.exe",
+    "args": ["-NoLogo"]
+  },
+  "debug": false,
+  "autoCompact": true
+}
