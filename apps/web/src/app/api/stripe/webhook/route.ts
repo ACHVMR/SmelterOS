@@ -1,17 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
-import Stripe from "stripe";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
-  apiVersion: "2025-12-15.clover",
-});
-
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || "";
+// Lazy initialization to avoid build-time errors
+function getStripe() {
+  const Stripe = require("stripe").default;
+  return new Stripe(process.env.STRIPE_SECRET_KEY || "", {
+    apiVersion: "2025-12-15.clover",
+  });
+}
 
 export async function POST(req: NextRequest) {
+  if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_WEBHOOK_SECRET) {
+    return NextResponse.json(
+      { error: "Stripe webhooks not configured" },
+      { status: 503 }
+    );
+  }
+
+  const stripe = getStripe();
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  
   const body = await req.text();
   const signature = req.headers.get("stripe-signature") || "";
 
-  let event: Stripe.Event;
+  let event;
 
   try {
     event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
@@ -22,54 +33,35 @@ export async function POST(req: NextRequest) {
 
   switch (event.type) {
     case "checkout.session.completed": {
-      const session = event.data.object as Stripe.Checkout.Session;
+      const session = event.data.object;
       const userId = session.metadata?.userId;
-      const customerId = session.customer as string;
-      const subscriptionId = session.subscription as string;
+      const subscriptionId = session.subscription;
 
       console.log(`Subscription created for user ${userId}:`, subscriptionId);
-
-      // TODO: Update user subscription in Firebase/database
-      // await updateUserSubscription(userId, {
-      //   stripeCustomerId: customerId,
-      //   stripeSubscriptionId: subscriptionId,
-      //   tier: "premium",
-      //   status: "active",
-      // });
-
       break;
     }
 
     case "customer.subscription.updated": {
-      const subscription = event.data.object as Stripe.Subscription;
+      const subscription = event.data.object;
       const userId = subscription.metadata?.userId;
 
       console.log(`Subscription updated for user ${userId}:`, subscription.status);
-
-      // TODO: Update subscription status in database
-
       break;
     }
 
     case "customer.subscription.deleted": {
-      const subscription = event.data.object as Stripe.Subscription;
+      const subscription = event.data.object;
       const userId = subscription.metadata?.userId;
 
       console.log(`Subscription canceled for user ${userId}`);
-
-      // TODO: Downgrade user to free tier
-
       break;
     }
 
     case "invoice.payment_failed": {
-      const invoice = event.data.object as Stripe.Invoice;
-      const customerId = invoice.customer as string;
+      const invoice = event.data.object;
+      const customerId = invoice.customer;
 
       console.log(`Payment failed for customer ${customerId}`);
-
-      // TODO: Send payment failure notification
-
       break;
     }
 

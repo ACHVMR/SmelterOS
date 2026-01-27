@@ -2,7 +2,6 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   // Use standalone output for server deployment (Cloud Run, etc.)
-  // This supports API routes unlike static export
   output: "standalone",
   
   // Image optimization
@@ -25,9 +24,9 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   
-  // Ignore ESLint errors during build (for CI)
-  eslint: {
-    ignoreDuringBuilds: true,
+  // Turbopack root configuration for monorepo
+  turbopack: {
+    root: ".",
   },
 };
 
