@@ -43,6 +43,21 @@ services:
     ports:
       - "8000:8080"
     environment:
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
+      - OPENROUTER_BASE_URL=${OPENROUTER_BASE_URL:-https://openrouter.ai/api/v1}
+      - HEYGEN_API_KEY=${HEYGEN_API_KEY:-}
+      - HEYGEN_BASE_URL=${HEYGEN_BASE_URL:-https://api.heygen.com}
+      - HEYGEN_V2_BASE_URL=${HEYGEN_V2_BASE_URL:-https://api.heygen.com/v2}
+      - ORACLE_GATEWAY_NAME=${ORACLE_GATEWAY_NAME:-oracle-gateway}
+      - ORACLE_GATEWAY_APP_NAME=${ORACLE_GATEWAY_APP_NAME:-SmelterOS Oracle Gateway}
+      - ORACLE_GATEWAY_APP_URL=${ORACLE_GATEWAY_APP_URL:-https://smelteros.local/oracle-gateway}
+      - ORACLE_GATEWAY_DEFAULT_ROUTE=${ORACLE_GATEWAY_DEFAULT_ROUTE:-general}
+      - ORACLE_GATEWAY_FREE_MODEL=${ORACLE_GATEWAY_FREE_MODEL:-google/gemini-3.1-flash}
+      - ORACLE_GATEWAY_DEFAULT_MODEL=${ORACLE_GATEWAY_DEFAULT_MODEL:-google/gemini-3.1-flash}
+      - ORACLE_GATEWAY_VALIDATION_MODEL=${ORACLE_GATEWAY_VALIDATION_MODEL:-google/gemini-2.0-flash-001}
+      - ORACLE_GATEWAY_PREMIUM_MODEL=${ORACLE_GATEWAY_PREMIUM_MODEL:-openai/gpt-4.1}
+      - ORACLE_GATEWAY_PRESENTATION_MODEL=${ORACLE_GATEWAY_PRESENTATION_MODEL:-google/gemini-2.0-flash-001}
+      - ORACLE_GATEWAY_TOOL_MODEL=${ORACLE_GATEWAY_TOOL_MODEL:-anthropic/claude-3.5-sonnet}
       - LITELLM_PATH=/litellm
       - PPTIST_PATH=/pptist
       - GEMINI_CLI_PATH=/gemini
