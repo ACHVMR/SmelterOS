@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireApiAuth } from "@/lib/api-auth";
 
-// Lazy initialization to avoid build-time errors
 function getStripe() {
   const Stripe = require("stripe").default;
   return new Stripe(process.env.STRIPE_SECRET_KEY || "", {
@@ -9,11 +9,11 @@ function getStripe() {
 }
 
 export async function POST(req: NextRequest) {
+  const authError = requireApiAuth(req);
+  if (authError) return authError;
+
   if (!process.env.STRIPE_SECRET_KEY) {
-    return NextResponse.json(
-      { error: "Stripe is not configured" },
-      { status: 503 }
-    );
+    return NextResponse.json({ error: "Stripe not configured" }, { status: 503 });
   }
 
   try {
@@ -21,46 +21,27 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { priceId, userId, email } = body;
 
-    // Get or create customer
-    let customerId: string;
-    
-    if (userId) {
-      const customer = await stripe.customers.create({
-        email,
-        metadata: { userId },
-      });
-      customerId = customer.id;
-    } else {
-      const customer = await stripe.customers.create({ email });
-      customerId = customer.id;
+    if (!priceId || !email) {
+      return NextResponse.json({ error: "priceId and email required" }, { status: 400 });
     }
 
-    // Create checkout session
+    const customer = await stripe.customers.create({
+      email,
+      ...(userId ? { metadata: { userId } } : {}),
+    });
+
     const session = await stripe.checkout.sessions.create({
-      customer: customerId,
+      customer: customer.id,
       payment_method_types: ["card"],
-      line_items: [
-        {
-          price: priceId,
-          quantity: 1,
-        },
-      ],
+      line_items: [{ price: priceId, quantity: 1 }],
       mode: "subscription",
       success_url: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3001"}/dashboard?success=true`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3001"}/pricing?canceled=true`,
-      subscription_data: {
-        metadata: {
-          userId,
-        },
-      },
+      subscription_data: { metadata: { userId: userId || "" } },
     });
 
     return NextResponse.json({ url: session.url, sessionId: session.id });
   } catch (error) {
-    console.error("Stripe checkout error:", error);
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Checkout failed" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Checkout failed" }, { status: 500 });
   }
 }

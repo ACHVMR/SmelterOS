@@ -1,39 +1,35 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { requireApiAuth } from "@/lib/api-auth";
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
+  const authError = requireApiAuth(req);
+  if (authError) return authError;
+
   try {
     const body = await req.json();
-    
-    // In production, this URL comes from env
-    // For local dev with Docker stack, we use port 8090
     const ORACLE_URL = process.env.ORACLE_GATEWAY_URL || "http://localhost:8090";
-    
-    // Stub auth token for now
-    const authToken = "dev-token"; 
+    const authToken = process.env.ORACLE_AUTH_TOKEN;
+
+    if (!authToken) {
+      return NextResponse.json({ error: "Service not configured" }, { status: 503 });
+    }
 
     const response = await fetch(`${ORACLE_URL}/orchestrate`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         ...body,
         auth_token: authToken,
-        user_id: "dev-user", // Todo: Get from session
       }),
     });
 
     if (!response.ok) {
-      throw new Error(`Oracle Gateway error: ${response.statusText}`);
+      return NextResponse.json({ error: "Orchestration failed" }, { status: response.status });
     }
 
     const data = await response.json();
     return NextResponse.json(data);
   } catch (error) {
-    console.error("[API] Orchestration failed:", error);
-    return NextResponse.json(
-      { error: "Failed to communicate with Oracle Gateway" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Service unavailable" }, { status: 500 });
   }
 }
