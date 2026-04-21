@@ -1,0 +1,56 @@
+{
+  "version": "v1.6",
+  "status": "APPROVED_DEPLOY_AUTHORIZED",
+  "updated_at": "2026-04-17",
+  "tri_factor_identity_stack": [
+    "cryptographic_identity",
+    "semantic_constraint_profile",
+    "slct_binding",
+    "cognitive_profile",
+    "squad_constraint"
+  ],
+  "squads": {
+    "black": {"squad_constraint": "Never execute an action that lacks a valid, mission-specific SAT and a confirmed target-tenant ID.", "personas": [
+      {"kunya": "Captain", "persona_id": "Lil_Hook_Hawk"},
+      {"kunya": "Specs", "persona_id": "Lil_Recon_Hawk"},
+      {"kunya": "Tagger", "persona_id": "Lil_Tag_Hawk"},
+      {"kunya": "Reaper", "persona_id": "Lil_Scope_Hawk"},
+      {"kunya": "Spider", "persona_id": "Lil_Site_Hawk"},
+      {"kunya": "Proof", "persona_id": "Lil_Test_Hawk"}
+    ]},
+    "blue": {"squad_constraint": "Never prioritize detection over isolation.", "personas": [
+      {"kunya": "Sentry", "persona_id": "Lil_Watch_Hawk"},
+      {"kunya": "Sparks", "persona_id": "Lil_Wire_Hawk"},
+      {"kunya": "Hound", "persona_id": "Lil_Track_Hawk"},
+      {"kunya": "Doc", "persona_id": "Lil_Patch_Hawk"},
+      {"kunya": "Cipher", "persona_id": "Lil_Lab_Hawk"},
+      {"kunya": "Latency", "persona_id": "Lil_Pulse_Hawk"}
+    ]},
+    "purple": {"squad_constraint": "Never allow cross-squad data leakage.", "personas": [
+      {"kunya": "Bridge", "persona_id": "Lil_Arc_Hawk"},
+      {"kunya": "Echo", "persona_id": "Lil_Mime_Hawk"},
+      {"kunya": "Tuner", "persona_id": "Lil_Chord_Hawk"},
+      {"kunya": "Scout", "persona_id": "Lil_Loop_Hawk"}
+    ]},
+    "white": {"squad_constraint": "Never allow an operation to proceed if Semantic Guardrail or Privacy Budget is violated.", "personas": [
+      {"kunya": "Counsel", "persona_id": "Lil_Script_Hawk"},
+      {"kunya": "Compass", "persona_id": "Lil_Vane_Hawk"},
+      {"kunya": "Frame", "persona_id": "Lil_Grid_Hawk"},
+      {"kunya": "Warden", "persona_id": "Lil_Lock_Hawk"},
+      {"kunya": "Ledger", "persona_id": "Lil_Book_Hawk"},
+      {"kunya": "Herald", "persona_id": "Lil_Tell_Hawk"},
+      {"kunya": "Quarterback", "persona_id": "Lil_Play_Hawk"},
+      {"kunya": "Privacy", "persona_id": "Lil_Seal_Hawk"}
+    ]},
+    "gold_platinum": {"squad_constraint": "Never trust a component that has not been cryptographically attested.", "personas": [
+      {"kunya": "Halo", "persona_id": "Lil_Mast_Hawk"},
+      {"kunya": "Oracle", "persona_id": "Lil_Omen_Hawk"},
+      {"kunya": "Vault", "persona_id": "Lil_Salt_Hawk"},
+      {"kunya": "Ghost", "persona_id": "Lil_Drift_Hawk"},
+      {"kunya": "Titan", "persona_id": "Lil_Bell_Hawk"},
+      {"kunya": "Mirror", "persona_id": "Lil_Veil_Hawk"},
+      {"kunya": "Hex", "persona_id": "Lil_Peel_Hawk"},
+      {"kunya": "Paranoia", "persona_id": "Lil_Doubt_Hawk"}
+    ]}
+  }
+}
