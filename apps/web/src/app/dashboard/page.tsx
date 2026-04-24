@@ -1,229 +1,196 @@
 "use client";
 
-import React from "react";
-import { 
-  Activity, 
-  Server, 
-  Database, 
-  Cpu, 
-  Globe, 
-  Shield, 
-  Zap, 
+import Link from "next/link";
+import type { ReactNode } from "react";
+import {
+  ArrowRight,
+  Briefcase,
   CheckCircle2,
-  AlertCircle,
-  Clock
+  Crown,
+  Shield,
+  Sparkles,
+  Users,
+  Wallet,
 } from "lucide-react";
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle 
-} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+
+type TeamMember = {
+  name: string;
+  role: string;
+  squad: "Black" | "Blue" | "Purple" | "White" | "Gold";
+  status: "Online" | "On Mission" | "Standby";
+};
+
+const team: TeamMember[] = [
+  { name: "Lil_Mast_Hawk", role: "Identity / MFA Lead", squad: "Gold", status: "Online" },
+  { name: "Lil_Watch_Hawk", role: "Detection Engine", squad: "Blue", status: "On Mission" },
+  { name: "Lil_Scope_Hawk", role: "Kinetic Execution", squad: "Black", status: "Standby" },
+  { name: "Lil_Seal_Hawk", role: "Edge Privacy Guard", squad: "White", status: "Online" },
+  { name: "Lil_Arc_Hawk", role: "Red/Blue Integration", squad: "Purple", status: "Online" },
+  { name: "Lil_Doubt_Hawk", role: "Internal Auditor", squad: "Gold", status: "On Mission" },
+];
+
+const squadColor: Record<TeamMember["squad"], string> = {
+  Black: "bg-zinc-700/20 text-zinc-200 border-zinc-600",
+  Blue: "bg-sky-500/10 text-sky-300 border-sky-500/40",
+  Purple: "bg-violet-500/10 text-violet-300 border-violet-500/40",
+  White: "bg-stone-400/10 text-stone-200 border-stone-500/40",
+  Gold: "bg-amber-500/10 text-amber-300 border-amber-500/40",
+};
+
+const statusColor: Record<TeamMember["status"], string> = {
+  Online: "text-emerald-400",
+  "On Mission": "text-orange-400",
+  Standby: "text-zinc-400",
+};
 
 export default function DashboardPage() {
   return (
-    <div className="min-h-screen bg-black text-foreground p-8 font-sans">
-      
-      {/* Header Section */}
-      <div className="flex flex-col gap-2 mb-8 border-b border-border pb-6">
-        <h1 className="text-3xl font-semibold tracking-tight">Overview</h1>
-        <p className="text-muted-foreground">
-          Manage your AI agents, deployments, and infrastructure health.
-        </p>
-      </div>
-
-      {/* High-Level Metrics */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
-        <MetricCard 
-          title="Total Requests" 
-          value="24.5k" 
-          change="+12% from last month" 
-          icon={<Activity className="h-4 w-4 text-muted-foreground" />}
-        />
-        <MetricCard 
-          title="Active Agents" 
-          value="12" 
-          change="+2 new agents" 
-          icon={<Cpu className="h-4 w-4 text-muted-foreground" />}
-        />
-        <MetricCard 
-          title="System Uptime" 
-          value="99.9%" 
-          change="Operational" 
-          icon={<Server className="h-4 w-4 text-emerald-500" />}
-        />
-        <MetricCard 
-          title="Avg. Response" 
-          value="142ms" 
-          change="-18ms improvement" 
-          icon={<Zap className="h-4 w-4 text-muted-foreground" />}
-        />
-      </div>
-
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
-        
-        {/* Main Content - Agent Status (4 cols) */}
-        <Card className="col-span-4 border-zinc-800 bg-zinc-950/50">
-          <CardHeader>
-            <CardTitle>Agent Status</CardTitle>
-            <CardDescription>Real-time monitoring of active AI agents.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow className="border-zinc-800 hover:bg-transparent">
-                  <TableHead className="w-[150px]">Agent Name</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Model</TableHead>
-                  <TableHead className="text-right">Load</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                <AgentRow name="Voice Agent" status="active" model="ElevenLabs v2" load="78%" />
-                <AgentRow name="Code Gen" status="active" model="GPT-4 Turbo" load="65%" />
-                <AgentRow name="Orchestrator" status="active" model="System" load="42%" />
-                <AgentRow name="Testing Bot" status="idle" model="Custom" load="0%" />
-                <AgentRow name="Deployer" status="idle" model="Script" load="0%" />
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-
-        {/* Sidebar - Recent Activity (3 cols) */}
-        <Card className="col-span-3 border-zinc-800 bg-zinc-950/50">
-          <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
-            <CardDescription>Latest system events and logs.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-6">
-              <ActivityItem 
-                time="2 min ago" 
-                title="Deployment Successful" 
-                desc="v2.4.0 deployed to production"
-                type="success"
-              />
-              <ActivityItem 
-                time="15 min ago" 
-                title="High Latency Alert" 
-                desc="Database response > 500ms"
-                type="warning"
-              />
-              <ActivityItem 
-                time="1 hour ago" 
-                title="New Component Created" 
-                desc="StatusIndicator added to lib"
-                type="info"
-              />
-              <ActivityItem 
-                time="2 hours ago" 
-                title="Backup Completed" 
-                desc="Daily snapshot saved to S3"
-                type="success"
-              />
+    <div className="min-h-screen bg-black text-white p-6 md:p-8">
+      <div className="mx-auto max-w-7xl space-y-6">
+        <header className="rounded-2xl border border-zinc-800 bg-gradient-to-br from-zinc-900 to-black p-6">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.25em] text-zinc-500">Deploy by ACHIEVEMOR</p>
+              <h1 className="mt-2 text-3xl font-semibold">Account Dashboard</h1>
+              <p className="mt-2 text-zinc-400">
+                Team operations, account posture, and deployment confidence for your Plugs.
+              </p>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+            <div className="flex gap-3">
+              <Button asChild variant="outline" className="border-zinc-700 bg-transparent text-zinc-200">
+                <Link href="/dashboard/security">Security Controls</Link>
+              </Button>
+              <Button asChild className="bg-orange-500 text-black hover:bg-orange-400">
+                <Link href="/dashboard/account">Open Account Center</Link>
+              </Button>
+            </div>
+          </div>
+        </header>
 
-      {/* Infrastructure Row */}
-      <div className="grid gap-6 md:grid-cols-3 mt-6">
-        <InfrastructureCard 
-          title="Database" 
-          status="Healthy" 
-          details="PostgreSQL 15 • 42% Active Conns"
-          icon={<Database className="h-5 w-5" />}
-        />
-        <InfrastructureCard 
-          title="API Gateway" 
-          status="Healthy" 
-          details="Cloudflare • 22ms Latency"
-          icon={<Globe className="h-5 w-5" />}
-        />
-        <InfrastructureCard 
-          title="Security" 
-          status="Secure" 
-          details="WAF Active • 0 Threats"
-          icon={<Shield className="h-5 w-5" />}
-        />
+        <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <Metric title="Active Hawks" value="32" hint="5 squads online" icon={<Users className="h-4 w-4" />} />
+          <Metric title="Ops Confidence" value="99.97%" hint="CIA gates healthy" icon={<Shield className="h-4 w-4" />} />
+          <Metric title="Monthly Spend" value="$27.50" hint="Pro plan + BYOK" icon={<Wallet className="h-4 w-4" />} />
+          <Metric title="Live Plugs" value="12" hint="2 in rollout" icon={<Sparkles className="h-4 w-4" />} />
+        </section>
+
+        <section className="grid gap-6 lg:grid-cols-3">
+          <Card className="lg:col-span-2 border-zinc-800 bg-zinc-950/70">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-white">
+                <Users className="h-5 w-5 text-orange-400" /> Team Command Grid
+              </CardTitle>
+              <CardDescription>Persona-aligned operators active in your tenant.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {team.map((member) => (
+                <div
+                  key={member.name}
+                  className="flex flex-col gap-3 rounded-xl border border-zinc-800 bg-zinc-900/40 p-4 md:flex-row md:items-center md:justify-between"
+                >
+                  <div>
+                    <p className="font-medium">{member.name}</p>
+                    <p className="text-sm text-zinc-400">{member.role}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge className={squadColor[member.squad]}>{member.squad} Squad</Badge>
+                    <span className={`text-sm ${statusColor[member.status]}`}>{member.status}</span>
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+
+          <Card className="border-zinc-800 bg-zinc-950/70">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-white">
+                <Briefcase className="h-5 w-5 text-orange-400" /> Account Posture
+              </CardTitle>
+              <CardDescription>Plan, limits, and mission-readiness snapshot.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-4">
+                <p className="text-sm text-zinc-400">Current Plan</p>
+                <p className="mt-1 text-xl font-semibold">Pro Shield</p>
+                <p className="text-sm text-zinc-500">Renews May 1, 2026</p>
+              </div>
+
+              <div>
+                <div className="mb-2 flex items-center justify-between text-sm">
+                  <span className="text-zinc-400">Privacy Budget (high-risk)</span>
+                  <span className="font-mono text-orange-300">81%</span>
+                </div>
+                <Progress value={81} className="h-2" />
+              </div>
+
+              <div>
+                <div className="mb-2 flex items-center justify-between text-sm">
+                  <span className="text-zinc-400">Compute Capacity</span>
+                  <span className="font-mono text-emerald-300">67%</span>
+                </div>
+                <Progress value={67} className="h-2" />
+              </div>
+
+              <Button asChild className="w-full bg-orange-500 text-black hover:bg-orange-400">
+                <Link href="/dashboard/account" className="inline-flex items-center justify-center gap-2">
+                  Manage Account <ArrowRight className="h-4 w-4" />
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </section>
+
+        <section className="grid gap-4 md:grid-cols-3">
+          <FeatureCard
+            icon={<Crown className="h-4 w-4 text-amber-300" />}
+            title="Team Design"
+            description="Assign squad goals, set constraints, and wire role-based permissions for every Hawk persona."
+          />
+          <FeatureCard
+            icon={<CheckCircle2 className="h-4 w-4 text-emerald-300" />}
+            title="Front-End Ops"
+            description="One pane to launch Plug deploys, monitor release health, and route support quickly."
+          />
+          <FeatureCard
+            icon={<Shield className="h-4 w-4 text-sky-300" />}
+            title="Account Defense"
+            description="Review billing, BYOK controls, session trust, and privacy/security posture with shared context."
+          />
+        </section>
       </div>
     </div>
   );
 }
 
-// Sub-components for cleaner code
-function MetricCard({ title, value, change, icon }: any) {
+function Metric({ title, value, hint, icon }: { title: string; value: string; hint: string; icon: ReactNode }) {
   return (
-    <Card className="border-zinc-800 bg-zinc-950/50">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
-        {icon}
+    <Card className="border-zinc-800 bg-zinc-950/70">
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <CardTitle className="text-sm text-zinc-400">{title}</CardTitle>
+        <span className="text-zinc-400">{icon}</span>
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold text-white">{value}</div>
-        <p className="text-xs text-muted-foreground mt-1">{change}</p>
+        <p className="text-2xl font-semibold">{value}</p>
+        <p className="mt-1 text-xs text-zinc-500">{hint}</p>
       </CardContent>
     </Card>
   );
 }
 
-function AgentRow({ name, status, model, load }: any) {
+function FeatureCard({ icon, title, description }: { icon: ReactNode; title: string; description: string }) {
   return (
-    <TableRow className="border-zinc-800 hover:bg-zinc-900/50">
-      <TableCell className="font-medium text-white">{name}</TableCell>
-      <TableCell>
-        <Badge variant={status === "active" ? "default" : "secondary"} className={status === "active" ? "bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20" : ""}>
-          {status}
-        </Badge>
-      </TableCell>
-      <TableCell className="text-muted-foreground">{model}</TableCell>
-      <TableCell className="text-right font-mono text-xs">{load}</TableCell>
-    </TableRow>
-  );
-}
-
-function ActivityItem({ time, title, desc, type }: any) {
-  const color = type === "success" ? "text-emerald-500" : type === "warning" ? "text-amber-500" : "text-blue-500";
-  return (
-    <div className="flex items-start gap-4">
-      <div className={`mt-1 h-2 w-2 rounded-full ${type === "success" ? "bg-emerald-500" : type === "warning" ? "bg-amber-500" : "bg-blue-500"}`} />
-      <div className="space-y-1">
-        <p className="text-sm font-medium leading-none text-white">{title}</p>
-        <p className="text-xs text-muted-foreground">{desc}</p>
-        <p className="text-[10px] text-zinc-500 font-mono pt-1">{time}</p>
-      </div>
-    </div>
-  );
-}
-
-function InfrastructureCard({ title, status, details, icon }: any) {
-  return (
-    <Card className="border-zinc-800 bg-zinc-950/50">
-      <CardHeader className="flex flex-row items-center gap-4 pb-2">
-        <div className="p-2 bg-zinc-900 rounded-md text-white">
-          {icon}
-        </div>
-        <div>
-          <CardTitle className="text-base text-white">{title}</CardTitle>
-          <CardDescription className="text-xs">{status}</CardDescription>
-        </div>
+    <Card className="border-zinc-800 bg-zinc-950/70">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base text-white">
+          {icon} {title}
+        </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="h-1 w-full bg-zinc-900 rounded-full overflow-hidden mb-2">
-          <div className="h-full bg-white/20 w-full" />
-        </div>
-        <p className="text-xs text-muted-foreground font-mono">{details}</p>
+        <p className="text-sm text-zinc-400">{description}</p>
       </CardContent>
     </Card>
   );
