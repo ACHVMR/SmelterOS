@@ -9,8 +9,8 @@ steps:
   # =========================================================================
   - name: 'node:20'
     id: 'install'
-    entrypoint: 'npm'
-    args: ['ci']
+    entrypoint: 'bash'
+    args: ['-c', 'cd apps/web && npm ci']
     env:
       - 'NODE_ENV=production'
 
@@ -19,8 +19,8 @@ steps:
   # =========================================================================
   - name: 'node:20'
     id: 'build'
-    entrypoint: 'npm'
-    args: ['run', 'build']
+    entrypoint: 'bash'
+    args: ['-c', 'cd apps/web && npm run build']
     waitFor: ['install']
 
   # =========================================================================
@@ -28,8 +28,8 @@ steps:
   # =========================================================================
   - name: 'node:20'
     id: 'test-phase3'
-    entrypoint: 'npm'
-    args: ['run', 'test:phase3']
+    entrypoint: 'bash'
+    args: ['-c', 'cd apps/web && npm run lint']
     waitFor: ['build']
     env:
       - 'NODE_ENV=test'

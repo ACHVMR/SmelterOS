@@ -1,13 +1,13 @@
 steps:
   # Install dependencies
   - name: 'node:20-alpine'
-    entrypoint: 'npm'
-    args: ['ci']
+    entrypoint: 'bash'
+    args: ['-c', 'cd apps/web && npm ci']
 
   # Build Next.js
   - name: 'node:20-alpine'
-    entrypoint: 'npm'
-    args: ['run', 'build']
+    entrypoint: 'bash'
+    args: ['-c', 'cd apps/web && npm run build']
     env:
       - 'NEXT_TELEMETRY_DISABLED=1'
 
