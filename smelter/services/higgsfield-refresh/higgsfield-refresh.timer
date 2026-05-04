@@ -1,0 +1,14 @@
+[Unit]
+Description=Run Higgsfield token refresh every 6 hours
+Requires=higgsfield-refresh.service
+
+[Timer]
+# 6h cadence keeps a 6.75-day buffer before any token expires (refresh window = 7 days).
+OnBootSec=2min
+OnUnitActiveSec=6h
+RandomizedDelaySec=5min
+Persistent=true
+Unit=higgsfield-refresh.service
+
+[Install]
+WantedBy=timers.target

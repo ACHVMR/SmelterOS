@@ -1,0 +1,13 @@
+[Unit]
+Description=Higgsfield device-auth token refresh
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+ExecStart=/usr/bin/python3 /root/higgsfield-refresh/refresh.py
+Environment=HIGGSFIELD_CFG_DIR=/root/.higgsfield
+StandardOutput=journal
+StandardError=journal
+TimeoutStartSec=180
